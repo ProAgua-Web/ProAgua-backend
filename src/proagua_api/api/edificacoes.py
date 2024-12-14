@@ -13,7 +13,7 @@ from .utils import save_file
 
 router = Router(tags=["Edificacoes"])
 
-@router.get("/", response=List[EdificacaoOut])
+@router.get("", response=List[EdificacaoOut])
 @paginate
 def list_edificacoes(request, filters: FilterEdificacao = Query(...)):
     qs = models.Edificacao.objects.all()
@@ -53,7 +53,7 @@ def delete_image(request, cod_edificacao: str, id_imagem: uuid.UUID):
     return {"success": True}
 
 
-@router.post("/", response=EdificacaoOut)
+@router.post("", response=EdificacaoOut)
 def create_edificacao(request, payload: EdificacaoIn):
     data = payload.dict()
     edificacao = models.Edificacao.objects.create(**data)

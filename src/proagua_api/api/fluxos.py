@@ -10,7 +10,7 @@ from proagua_api.models.fluxo import Fluxo
 router = Router()
 
 
-@router.get("/", response=List[FluxoOut], tags=["Fluxos"])
+@router.get("", response=List[FluxoOut], tags=["Fluxos"])
 @paginate
 def list_fluxo(request):
     qs = Fluxo.objects.all()
@@ -23,7 +23,7 @@ def get_fluxo(request, id_fluxo: int):
     return fluxo
 
 
-@router.post("/", response=FluxoOut, tags=["Fluxos"])
+@router.post("", response=FluxoOut, tags=["Fluxos"])
 def create_fluxo(request, data: FluxoIn):
     fluxo = Fluxo.objects.create()
     fluxo.pontos.set(data.pontos)

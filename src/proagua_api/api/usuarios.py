@@ -10,7 +10,7 @@ from .schemas.usuario import UsuarioOut, UsuarioIn, UsuarioUpdate
 router = Router()
 
 
-@router.get("/", response=List[UsuarioOut], tags=["Usuarios"])
+@router.get("", response=List[UsuarioOut], tags=["Usuarios"])
 @paginate
 def list_usuario(request):
     qs = User.objects.all()
@@ -23,7 +23,7 @@ def get_usuario(request, username: str):
     return usuario
 
 
-@router.post("/", response=UsuarioOut, tags=["Usuarios"])
+@router.post("", response=UsuarioOut, tags=["Usuarios"])
 def create_usuario(request, payload: UsuarioIn):
     user_data = payload.dict()
     user = User.objects.create_user(**user_data)

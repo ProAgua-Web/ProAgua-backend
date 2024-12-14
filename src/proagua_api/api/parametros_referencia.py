@@ -12,7 +12,7 @@ from .schemas.parametros_referencia import ParametrosReferenciaIn, ParametrosRef
 
 router = Router(tags=["ParametrosReferencia"])
 
-@router.get("/", response=ParametrosReferenciaOut)
+@router.get("", response=ParametrosReferenciaOut)
 def get_parametros_referencia(request):
     qs = models.ParametrosReferencia.objects.all()
     if qs.exists():
@@ -20,7 +20,7 @@ def get_parametros_referencia(request):
     return {"success": False}
 
 
-@router.post("/", response=ParametrosReferenciaOut)
+@router.post("", response=ParametrosReferenciaOut)
 def create_parametros_referencia(request, payload: ParametrosReferenciaIn):
     qs = models.ParametrosReferencia.objects.all()
     if not qs.exists():
@@ -28,7 +28,7 @@ def create_parametros_referencia(request, payload: ParametrosReferenciaIn):
         return obj_parametros_referencia
     return {"success": False}
 
-@router.put("/", response=ParametrosReferenciaOut)
+@router.put("", response=ParametrosReferenciaOut)
 def update_parametros_referencia(request, payload: ParametrosReferenciaIn):
     obj_parametros_referencia = models.ParametrosReferencia.objects.last()
     data_dict = payload.dict()
@@ -45,7 +45,7 @@ def update_parametros_referencia(request, payload: ParametrosReferenciaIn):
 
     return obj_parametros_referencia
 
-@router.delete("/")
+@router.delete("")
 def delete_parametros_referencia(request):
     qs = models.ParametrosReferencia.objects.all()
     if qs.exists():

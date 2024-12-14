@@ -18,7 +18,7 @@ import pandas as pd
 router = Router(tags=["Coletas"])
 
 
-@router.get("/", response=List[ColetaOut])
+@router.get("", response=List[ColetaOut])
 @paginate
 def list_coleta(request, filter: FilterColeta = Query(...)):
     qs = models.Coleta.objects
@@ -133,7 +133,7 @@ def get_coleta(request, id_coleta: int):
     return qs
 
 
-@router.post("/")
+@router.post("")
 def create_coleta(request, payload: ColetaIn):
     data_dict = payload.dict()
     responsavel_ids = data_dict.get("responsavel", [])

@@ -105,7 +105,7 @@ def set_status(qs, parametros):
     
     return qs
 
-@router.get("/", response=List[SequenciaColetasOut])
+@router.get("", response=List[SequenciaColetasOut])
 @paginate
 def list_sequencia(request, filter: FilterSequenciaColetas = Query(...)):
     parametros = models.ParametrosReferencia.objects.first()
@@ -158,7 +158,7 @@ def get_sequencia(request, id_sequencia: int):
     return qs
 
 
-@router.post("/")
+@router.post("")
 def create_sequencia(request, payload: SequenciaColetasIn):
     id_ponto = payload.dict().get("ponto")
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)

@@ -25,7 +25,7 @@ from io import BytesIO
 router = Router(tags=["Solicitacoes"])
 
 
-@router.get("/", response=List[SolicitacaoOut])
+@router.get("", response=List[SolicitacaoOut])
 @paginate
 def list_solicitacoes(request, filters: FilterSolicitacao = Query(...)):
     qs = models.Solicitacao.objects.all()
@@ -53,7 +53,7 @@ def upload_image(request, id: int, description: str = Form(...), file: UploadedF
     return {"success": True}
 
 
-@router.post("/", response=SolicitacaoOut)
+@router.post("", response=SolicitacaoOut)
 def create_solicitacao(request, payload: SolicitacaoIn):
     data = payload.dict()
     ponto = get_object_or_404(models.PontoColeta, id=data.pop("ponto_id"))

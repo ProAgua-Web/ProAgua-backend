@@ -20,7 +20,7 @@ from .utils import save_file
 
 router = Router(tags=["Pontos"])
 
-@router.get("/", response=List[PontoColetaOut])
+@router.get("", response=List[PontoColetaOut])
 @paginate
 def list_ponto(request, filters: FilterPontos = Query(...)):
     qs = models.PontoColeta.objects
@@ -76,7 +76,7 @@ def delete_image(request, id_ponto: str, id_imagem: uuid.UUID):
     return {"success": True}
 
 
-@router.post("/")
+@router.post("")
 def create_ponto(request, payload: PontoColetaIn):
     edificacao = get_object_or_404(models.Edificacao, codigo=payload.codigo_edificacao)
     amontante = get_object_or_404(models.PontoColeta, id=payload.amontante) if payload.amontante else None    
