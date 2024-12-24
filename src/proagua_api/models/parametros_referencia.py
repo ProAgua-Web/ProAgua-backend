@@ -53,6 +53,19 @@ class ParametrosReferencia(models.Model):
         default=5.0
     )
 
+    min_cor = models.FloatField(
+        verbose_name="cor mínima",
+        blank=True,
+        null=True,
+        default=None,
+    )
+    max_cor = models.FloatField(
+        verbose_name="cor máxima",
+        blank=True,
+        null=True,
+        default=None,
+    )
+    
     # Está adequada se estiver ausente
     coliformes_totais = models.BooleanField(
         verbose_name="coliformes totais",
