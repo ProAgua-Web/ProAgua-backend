@@ -12,17 +12,8 @@ from . import (
     parametros_referencia,
     solicitacoes
 )
-# import orjson
-# from ninja.renderers import BaseRenderer
 
-
-# class ORJSONRenderer(BaseRenderer):
-#     media_type = "application/json"
-
-#     def render(self, request, data, *, response_status):
-#         return orjson.dumps(data)
-
-api = NinjaAPI(auth=auth.JWTBearer(), csrf=False)
+api = NinjaAPI(auth=auth.JWTBearer(), csrf=True)
 
 # Public routes
 @api.get("/csrf", auth=None)
