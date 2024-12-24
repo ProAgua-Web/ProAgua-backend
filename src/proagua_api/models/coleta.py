@@ -61,7 +61,7 @@ class Coleta(models.Model):
         blank=True,
     )
     ordem = models.CharField(
-        max_length=1,
+        max_length=8,
         choices=(
             ("C", "Coleta"),
             ("R", "Recoleta")
