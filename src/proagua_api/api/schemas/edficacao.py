@@ -18,7 +18,7 @@ class EdificacaoOut(Schema):
     campus: str 
     cronograma: int
     # pontos_url: str
-    # imagens: List[ImageOut]
+    imagens: List[ImageOut]
     informacoes_gerais: Optional[str] = None
     
     @staticmethod
