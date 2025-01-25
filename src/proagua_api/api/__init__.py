@@ -13,7 +13,7 @@ from . import (
     solicitacoes
 )
 
-api = NinjaAPI(auth=auth.JWTBearer(), csrf=True)
+api = NinjaAPI(auth=auth.JWTBearer(), csrf=False)
 
 # Public routes
 @api.get("/csrf", auth=None)
