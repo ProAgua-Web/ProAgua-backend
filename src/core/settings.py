@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
@@ -67,9 +67,10 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
+    'proagua_api.middleware.DisableCSRFMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -172,14 +173,14 @@ CORS_TRUSTED_ORIGINS = [
     'http://127.0.0.1:3000',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',
-    'http://localhost:8000',
-    'https://proagua-ufersa.up.railway.app',
-    'https://pro-agua-frontend.vercel.app',
-    'https://127.0.0.1:3000',
-    'http://127.0.0.1:3000',
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     'http://localhost:3000',
+#     'http://localhost:8000',
+#     'https://proagua-ufersa.up.railway.app',
+#     'https://pro-agua-frontend.vercel.app',
+#     'https://127.0.0.1:3000',
+#     'http://127.0.0.1:3000',
+# ]
 
 CORS_ALLOW_CREDENTIALS = True
 
