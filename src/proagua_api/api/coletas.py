@@ -57,12 +57,12 @@ def get_coletas_excel(request, filter: FilterColeta = Query(...)):
 
     df = df.rename(columns={
         "id": "ID",
-        "temperatura": "Temperatura",
-        "cloro_residual_livre": "Cloro Residual Livre",
-        "turbidez": "Turbidez",
-        "coliformes_totais": "Coliformes Totais",
-        "escherichia": "Escherichia coli",
-        "cor": "Cor Aparente",
+        "temperatura": "Temperatura (°C)",
+        "cloro_residual_livre": "Cloro Residual Livre (mg/L)",
+        "turbidez": "Turbidez (uT)",
+        "coliformes_totais": "Coliformes Totais (/100mL)",
+        "escherichia": "Escherichia coli (/100mL)",
+        "cor": "Cor Aparente (uH)",
         "data": "Data",
         "ordem": "Ordem",
         "sequencia_id": "ID Sequência",
