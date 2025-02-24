@@ -6,13 +6,25 @@ import os
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from ninja import Router, Query, UploadedFile, File, Form
-from ninja.pagination import paginate
 
+from .pagination.pagination import paginate
+from .pagination.custom_paginator import CustomPaginator
 from .schemas.solicitacao import (
-    SolicitacaoIn, SolicitacaoOut, FilterSolicitacao, SolicitacaoUpdate)
-from .schemas.ponto_coleta import PontoColetaIn, PontoColetaOut
+    SolicitacaoIn,
+    SolicitacaoOut,
+    FilterSolicitacao,
+    SolicitacaoUpdate
+)
+from .schemas.ponto_coleta import (
+    PontoColetaIn,
+    PontoColetaOut,
+)
 from .. import models
 from .utils import save_file
+from .schemas import (
+    ResponseSchema,
+    PaginatedResponseSchema,
+)
 
 from docx import Document
 from docx.shared import Pt, Inches
@@ -25,8 +37,8 @@ from io import BytesIO
 router = Router(tags=["Solicitacoes"])
 
 
-@router.get("", response=List[SolicitacaoOut])
-@paginate
+@router.get("", response=PaginatedResponseSchema[SolicitacaoOut])
+@paginate(CustomPaginator)
 def list_solicitacoes(request, filters: FilterSolicitacao = Query(...)):
     qs = models.Solicitacao.objects.all()
     return filters.filter(qs)

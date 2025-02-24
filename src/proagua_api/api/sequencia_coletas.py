@@ -4,11 +4,13 @@ import time
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Count, Subquery, OuterRef
 from ninja import Router, Query
-from ninja.pagination import paginate
 from ninja.errors import HttpError
 
-from .schemas.sequencia_coletas import *
+from .pagination.pagination import paginate
+from .pagination.custom_paginator import CustomPaginator
 from .. import models
+from .schemas.sequencia_coletas import *
+from .schemas import ResponseSchema, PaginatedResponseSchema
 
 router = Router(tags=["Sequencias"])
 
@@ -105,8 +107,8 @@ def set_status(qs, parametros):
     
     return qs
 
-@router.get("", response=List[SequenciaColetasOut])
-@paginate
+@router.get("", response=PaginatedResponseSchema[SequenciaColetasOut])
+@paginate(CustomPaginator)
 def list_sequencia(request, filter: FilterSequenciaColetas = Query(...)):
     parametros = models.ParametrosReferencia.objects.first()
 

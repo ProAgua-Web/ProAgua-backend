@@ -6,18 +6,21 @@ from ninja import Router, Query, UploadedFile, File, Form
 from ninja.errors import HttpError
 from ninja.pagination import paginate
 
+from .schemas import ResponseSchema, PaginatedResponseSchema
 from .schemas.edficacao import *
 from .schemas.ponto_coleta import (PontoColetaIn, PontoColetaOut)
 from .. import models
-from .utils import save_file
+from .pagination.pagination import paginate
+from .pagination.custom_paginator import CustomPaginator
 
 router = Router(tags=["Edificacoes"])
 
-@router.get("", response=List[EdificacaoOut])
-@paginate
+@router.get("", response=PaginatedResponseSchema[EdificacaoOut])
+@paginate(CustomPaginator)
 def list_edificacoes(request, filters: FilterEdificacao = Query(...)):
     qs = models.Edificacao.objects.all()
-    return filters.filter(qs)
+    qs = filters.filter(qs)
+    return qs
 
 
 @router.get("/{cod_edificacao}", response=EdificacaoOut)

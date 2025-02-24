@@ -3,15 +3,17 @@ from typing import List
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
-from ninja.pagination import paginate
 
+from .pagination.pagination import paginate
+from .pagination.custom_paginator import CustomPaginator
+from .schemas import ResponseSchema, PaginatedResponseSchema
 from .schemas.usuario import UsuarioOut, UsuarioIn, UsuarioUpdate
 
-router = Router()
+router = Router(tags=["Usuarios"])
 
 
-@router.get("", response=List[UsuarioOut], tags=["Usuarios"])
-@paginate
+@router.get("", response=PaginatedResponseSchema[UsuarioOut])
+@paginate(CustomPaginator)
 def list_usuario(request):
     qs = User.objects.all()
     return qs

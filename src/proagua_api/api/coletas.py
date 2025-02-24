@@ -1,31 +1,30 @@
 from typing import List
+from io import BytesIO
+from io import StringIO
 
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.http import FileResponse
 from ninja import Router, Query
-from ninja.pagination import paginate
-
-from io import BytesIO
-from io import StringIO
+import pandas as pd
 
 from .schemas.coleta import *
 from .schemas.usuario import UsuarioOut
+from .schemas import ResponseSchema, PaginatedResponseSchema
 from .. import models
-
-import pandas as pd
+from .pagination.pagination import paginate
+from .pagination.custom_paginator import CustomPaginator
 
 router = Router(tags=["Coletas"])
 
-
-@router.get("", response=List[ColetaOut])
-@paginate
-def list_coleta(request, filter: FilterColeta = Query(...)):
+@router.get("", response=PaginatedResponseSchema[ColetaOut])
+@paginate(CustomPaginator)
+def list_coleta(request, filter: FilterColeta = Query(...)) -> List[ColetaOut]:
     qs = models.Coleta.objects
     qs = qs.select_related("ponto", "ponto__edificacao")
     qs = qs.prefetch_related("ponto__imagens", "ponto__edificacao__imagens", "responsavel")
-
-    return filter.filter(qs).order_by("data")
+    qs = filter.filter(qs).order_by("data")
+    return qs
 
 
 @router.get("/csv", response=List[ColetaOut])
