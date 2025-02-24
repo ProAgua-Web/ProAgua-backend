@@ -11,6 +11,7 @@ from .pagination.custom_paginator import CustomPaginator
 from .. import models
 from .schemas.sequencia_coletas import *
 from .schemas import ResponseSchema, PaginatedResponseSchema
+from .utils import response
 
 router = Router(tags=["Sequencias"])
 
@@ -154,13 +155,13 @@ def list_sequencia(request, filter: FilterSequenciaColetas = Query(...)):
     return qs
 
 
-@router.get("/{id_sequencia}", response=SequenciaColetasOut)
+@router.get("/{id_sequencia}", response=ResponseSchema[SequenciaColetasOut])
 def get_sequencia(request, id_sequencia: int):
     qs = get_object_or_404(models.SequenciaColetas, id=id_sequencia)
-    return qs
+    return response(data=qs)
 
 
-@router.post("")
+@router.post("", response=ResponseSchema[SequenciaColetasOut])
 def create_sequencia(request, payload: SequenciaColetasIn):
     id_ponto = payload.dict().get("ponto")
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
@@ -170,30 +171,36 @@ def create_sequencia(request, payload: SequenciaColetasIn):
 
     sequencia = models.SequenciaColetas.objects.create(**payload_dict)
     sequencia.save()
-    return {"success": True}
+
+    return response(data=sequencia)
 
 
-@router.put("/{id_sequencia}")
+@router.put("/{id_sequencia}", response=ResponseSchema[SequenciaColetasOut])
 def update_sequencia(request, id_sequencia: int, payload: SequenciaColetasIn):
     sequencia = get_object_or_404(models.SequenciaColetas, id=id_sequencia)
     for attr, value in payload.dict().items():
         setattr(sequencia, attr, value)
     sequencia.save()
-    return {"success": True}
+
+    return response(data=sequencia)
 
 
-@router.delete("/{id_sequencia}")
+@router.delete("/{id_sequencia}", response=ResponseSchema[SequenciaColetasOut])
 def delete_sequencia(request, id_sequencia: int):
     sequencia = get_object_or_404(models.SequenciaColetas, id=id_sequencia)
-    
     if models.SequenciaColetas.has_dependent_objects(sequencia):
         raise HttpError(409, "Conflict: Related objects exist")
-
     sequencia.delete()
-    return {"success": True}
+
+    return response(data=sequencia)
 
 
-@router.get("/{id_sequencia}/coletas", response=List[ColetaOut])
+@router.get("/{id_sequencia}/coletas", response=PaginatedResponseSchema[ColetaOut])
 def list_coletas_sequencia(request, id_sequencia: int):
     qs = models.Coleta.objects.filter(sequencia__id=id_sequencia)
-    return qs
+    return response(
+        data={
+            "data": qs,
+            "count": qs.count()
+        }
+    )

@@ -13,6 +13,8 @@ from . import (
     solicitacoes
 )
 
+from .schemas import ResponseSchema
+
 api = NinjaAPI(auth=auth.JWTBearer(), csrf=False)
 
 # Public routes
@@ -22,6 +24,7 @@ def get_csrf_token(request):
     response = JsonResponse({"csrftoken": token})
     response.set_cookie('csrftoken', token, path='/', samesite='None', secure=True)
     return response
+
 
 # Private routes
 api.add_router("/auth", auth.router)

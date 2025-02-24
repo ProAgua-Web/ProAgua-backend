@@ -25,6 +25,7 @@ from .schemas import (
     ResponseSchema,
     PaginatedResponseSchema,
 )
+from .utils import response
 
 from docx import Document
 from docx.shared import Pt, Inches
@@ -44,11 +45,10 @@ def list_solicitacoes(request, filters: FilterSolicitacao = Query(...)):
     return filters.filter(qs)
 
 
-@router.get("/{id}", response=SolicitacaoOut)
+@router.get("/{id}", response=ResponseSchema[SolicitacaoOut])
 def get_solicitacao(request, id: int):
     qs = get_object_or_404(models.Solicitacao, id=id)
-    print(qs)
-    return qs
+    return response(data=qs)
 
 
 @router.post("/{id}/imagem")
@@ -65,16 +65,17 @@ def upload_image(request, id: int, description: str = Form(...), file: UploadedF
     return {"success": True}
 
 
-@router.post("", response=SolicitacaoOut)
+@router.post("", response=ResponseSchema[SolicitacaoOut])
 def create_solicitacao(request, payload: SolicitacaoIn):
     data = payload.dict()
     ponto = get_object_or_404(models.PontoColeta, id=data.pop("ponto_id"))
     data["ponto"] = ponto
     solicitacao = models.Solicitacao.objects.create(**data)
     solicitacao.save()
-    return solicitacao
+    return response(data=solicitacao)
 
-@router.put("/{id}", response=SolicitacaoOut)
+
+@router.put("/{id}", response=ResponseSchema[SolicitacaoOut])
 def update_solicitacao(request, id: int, payload: SolicitacaoUpdate):
     data = payload.dict()
 
@@ -85,14 +86,16 @@ def update_solicitacao(request, id: int, payload: SolicitacaoUpdate):
     for attr, value in data.items():
         setattr(solicitacao, attr, value)
     solicitacao.save()
-    return solicitacao
+    
+    return response(data=solicitacao)
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response=ResponseSchema[SolicitacaoOut])
 def delete_solicitacao(request, id: int):
     solicitacao = get_object_or_404(models.Solicitacao, id=id)
     solicitacao.delete()
-    return {"success": True}
+    return response(data=solicitacao)
+
 
 @router.get("/{id}/document")
 def generate_doc(request, id: int):
@@ -213,4 +216,5 @@ def generate_doc(request, id: int):
     doc_io = BytesIO()
     doc.save(doc_io)
     doc_io.seek(0)
+    
     return FileResponse(doc_io, as_attachment=True, filename="solicitacao.docx")
