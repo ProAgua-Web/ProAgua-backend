@@ -10,18 +10,20 @@ import uuid
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import Router, Query, UploadedFile, File, Form
-from ninja.pagination import paginate
 from ninja.errors import HttpError
 
+from .pagination.pagination import paginate
+from .pagination.custom_paginator import CustomPaginator
 from .schemas.ponto_coleta import *
 from .schemas.coleta import ColetaOut
+from .schemas import PaginatedResponseSchema
 from .. import models
 from .utils import save_file
 
 router = Router(tags=["Pontos"])
 
-@router.get("", response=List[PontoColetaOut])
-@paginate
+@router.get("", response=PaginatedResponseSchema[PontoColetaOut])
+@paginate(CustomPaginator)
 def list_ponto(request, filters: FilterPontos = Query(...)):
     qs = models.PontoColeta.objects
     qs = qs.select_related("edificacao")
