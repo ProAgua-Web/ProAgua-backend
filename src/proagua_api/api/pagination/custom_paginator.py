@@ -16,7 +16,11 @@ class CustomPaginator(PaginationBase):
     def paginate_queryset(self, queryset, pagination: Input, **params):
         count = queryset.count()
         queryset = list(queryset)
-        items = queryset[pagination.offset: pagination.offset + pagination.limit]
+        
+        if pagination.limit > 0:
+            items = queryset[pagination.offset: pagination.offset + pagination.limit]
+        else:
+            items = queryset[pagination.offset:]
         
         return  {
             "data": {
