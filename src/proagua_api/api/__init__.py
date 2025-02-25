@@ -1,6 +1,10 @@
+import re
+
 from ninja import NinjaAPI
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
+from ninja.errors import ValidationError
+from django.db.utils import IntegrityError
 
 from . import (
     auth,
@@ -10,12 +14,76 @@ from . import (
     sequencia_coletas,
     usuarios,
     parametros_referencia,
-    solicitacoes
+    solicitacoes,
 )
 
 from .schemas import ResponseSchema
+from .utils import response
 
 api = NinjaAPI(auth=auth.JWTBearer(), csrf=False)
+
+
+# Exception handlers
+@api.exception_handler(ValidationError)
+def validation_error_handler(request, exc: ValidationError):
+    errors: list = []
+
+    for e in exc.errors:
+        errors.append({
+            "type": "ValidationError",
+            "message": e["msg"],
+            "field": e["loc"][-1]
+        })
+    
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=400
+    )
+
+
+@api.exception_handler(IntegrityError)
+def integrity_error_handler(request, exc: IntegrityError):
+    errors: list = []
+    error_message = str(exc)
+
+    # Erro de chave única (valor duplicado)
+    if "duplicate key value violates unique constraint" in error_message:
+        match = re.search(r'unique constraint \"(.+?)\"', error_message)
+        match_key = re.search(r'Key \((.+?)\)=\((.+?)\)', error_message)
+        campo, valor = match_key.groups() if match_key else ("campo desconhecido", "valor já existente")
+        error_message = f"O valor '{valor}' já existe no campo '{campo}'. Escolha um valor diferente!"
+
+    # Erro de chave primária duplicada
+    elif "UNIQUE constraint failed" in error_message:
+        match = re.search(r'UNIQUE constraint failed: (.+?)\.', error_message)
+        campo = match.group(1) if match else "um campo único"
+        error_message = f"Já existe um registro com este valor em '{campo}'. Tente algo diferente!"
+
+    # Erro de chave estrangeira
+    elif "FOREIGN KEY constraint failed" in error_message:
+        error_message = "Parece que está tentando referenciar algo que não existe! Verifique os dados antes de salvar."
+
+    # Erro de campo obrigatório (`NOT NULL`)
+    elif "NOT NULL constraint failed" in error_message:
+        match = re.search(r'NOT NULL constraint failed: (.+?)\.', error_message)
+        campo = match.group(1) if match else "um campo obrigatório"
+        error_message = f"O campo '{campo}' é obrigatório! Certifique-se de preenchê-lo antes de continuar."
+
+    else:
+        error_message = "Ocorreu um erro."
+    
+    errors.append({
+        "type": "IntegrityError",
+        "message": error_message,
+    })
+
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=400
+    )
+
 
 # Public routes
 @api.get("/csrf", auth=None)
