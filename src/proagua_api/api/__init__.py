@@ -1,9 +1,10 @@
 import re
 
 from ninja import NinjaAPI
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.middleware.csrf import get_token
 from ninja.errors import ValidationError
+from ninja.errors import HttpError
 from django.db.utils import IntegrityError
 
 from . import (
@@ -82,6 +83,51 @@ def integrity_error_handler(request, exc: IntegrityError):
         request=request,
         data=response(errors=errors),
         status=400
+    )
+
+@api.exception_handler(HttpError)
+def http_error_handler(request, exc: HttpError):
+    errors = [
+        {
+            "type": f'Http{exc.status_code}',
+            "message": exc.message
+        }
+    ]
+
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=exc.status_code
+    )
+
+@api.exception_handler(Exception)
+def exception_handler(request, exc: Exception):
+    errors = [
+        {
+            "type": "Exception",
+            "message": "Ocorreu um erro no sistema" + str(exc)
+        }
+    ]
+
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=500
+    )
+
+@api.exception_handler(Http404)
+def http_404_handler(request, exc: Exception):
+    errors = [
+        {
+            "type": "Http404",
+            "message": str(exc)
+        }
+    ]
+
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=404
     )
 
 
