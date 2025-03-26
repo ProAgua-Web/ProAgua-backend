@@ -47,10 +47,14 @@ class ColetaOut(Schema):
 
 
 class FilterColeta(FilterSchema):
-    responsavel__username__contains: Optional[str] = Field(
+    responsavel: Optional[str] = Field( 
         default=None,
-        alias="responsavel"
-    )
+        q=[
+            'responsavel__username__icontains',
+            'responsavel__first_name__icontains',
+            'responsavel__last_name__icontains'
+        ]
+    ) # type: ignore
     
     data__gte: Optional[date] = Field(
         default=None,
