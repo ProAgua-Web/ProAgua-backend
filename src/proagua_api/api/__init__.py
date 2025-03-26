@@ -7,6 +7,8 @@ from ninja.errors import ValidationError
 from ninja.errors import HttpError
 from django.db.utils import IntegrityError
 
+from proagua_api.api.exceptions.invalid_reference import InvalidReferenceException
+
 from . import (
     auth,
     edificacoes,
@@ -120,6 +122,22 @@ def http_404_handler(request, exc: Exception):
     errors = [
         {
             "type": "Http404",
+            "message": str(exc)
+        }
+    ]
+
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=404
+    )
+
+
+@api.exception_handler(InvalidReferenceException)
+def invalid_reference_handler(request, exc: Exception):
+    errors = [
+        {
+            "type": "InvalidReference",
             "message": str(exc)
         }
     ]
