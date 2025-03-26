@@ -6,6 +6,8 @@ from django.db.models import Q, Count, Subquery, OuterRef
 from ninja import Router, Query
 from ninja.errors import HttpError
 
+from proagua_api.api.exceptions.invalid_reference import InvalidReferenceException
+
 from .pagination.pagination import paginate
 from .pagination.custom_paginator import CustomPaginator
 from .. import models
@@ -88,10 +90,21 @@ def create_sequencia(request, payload: SequenciaColetasIn):
 @router.put("/{id_sequencia}", response=ResponseSchema[SequenciaColetasOut])
 def update_sequencia(request, id_sequencia: int, payload: SequenciaColetasIn):
     sequencia = get_object_or_404(models.SequenciaColetas, id=id_sequencia)
-    for attr, value in payload.dict().items():
+    ponto = models.PontoColeta.objects.filter(pk=payload.ponto).first()
+
+    # Check if the ponto exists
+    if ponto is None:
+        raise InvalidReferenceException("Ponto", payload.ponto)
+
+    # Put the ponto object inside the payload data dictionary
+    data = payload.dict()
+    data["ponto"] = ponto
+
+    # Change the sequencia values and save
+    for attr, value in data.items():
         setattr(sequencia, attr, value)
     sequencia.save()
-
+    
     return response(data=sequencia)
 
 
