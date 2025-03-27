@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 import csv
 from io import StringIO
@@ -60,13 +61,12 @@ class Coleta(models.Model):
         verbose_name="responsaveis",
         blank=True,
     )
-    ordem = models.CharField(
-        max_length=8,
-        choices=(
-            ("C", "Coleta"),
-            ("R", "Recoleta")
-        ),
-        default=("C", "Coleta"),
+    ordem = models.SmallIntegerField(
+        default=0,
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(2),
+        ]
     )
     status = models.BooleanField(
         verbose_name="status",
