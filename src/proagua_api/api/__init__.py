@@ -62,11 +62,12 @@ def integrity_error_handler(request, exc: IntegrityError):
             campos = campo.split(',')
             valores = valor.split(',')
 
-            for c, v in zip(campos, valores):
+            for field, value in zip(campos, valores):
+                field = field.lstrip().rstrip()
                 errors.append({
                     "type": "IntegrityError",
-                    "message": f"O valor '{v}' já existe no campo '{c}'. Escolha um valor diferente!",
-                    "field": c
+                    "message": f"O valor '{value}' já existe no campo '{field}'. Escolha um valor diferente!",
+                    "field": field
                 })
 
     # Erro de chave primária duplicada
