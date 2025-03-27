@@ -31,7 +31,7 @@ class ColetaOut(Schema):
     cor: float
     data: datetime
     responsaveis_id: List[int]
-    ordem: str
+    ordem: int
     sequencia_id: int
     ponto: PontoColetaOut
     status: Optional[bool] = None
