@@ -75,10 +75,10 @@ def get_sequencia(request, id_sequencia: int):
 
 @router.post("", response=ResponseSchema[SequenciaColetasOut])
 def create_sequencia(request, payload: SequenciaColetasIn):
-    id_ponto = payload.dict().get("ponto")
-    ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
+    ponto = get_object_or_404(models.PontoColeta, id=payload.ponto_id)
 
     payload_dict = payload.dict()
+    payload_dict.pop('ponto_id')
     payload_dict["ponto"] = ponto
 
     sequencia = models.SequenciaColetas.objects.create(**payload_dict)
