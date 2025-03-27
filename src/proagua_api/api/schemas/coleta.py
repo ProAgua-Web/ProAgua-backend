@@ -18,7 +18,7 @@ class ColetaIn(Schema):
     cor: float
     data: datetime
     responsavel: List[int]
-    ordem: str
+    ordem: int
 
 
 class ColetaOut(Schema):
