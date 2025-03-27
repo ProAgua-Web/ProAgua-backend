@@ -87,6 +87,7 @@ def integrity_error_handler(request, exc: IntegrityError):
         status=400
     )
 
+
 @api.exception_handler(HttpError)
 def http_error_handler(request, exc: HttpError):
     errors = [
@@ -102,6 +103,7 @@ def http_error_handler(request, exc: HttpError):
         status=exc.status_code
     )
 
+
 @api.exception_handler(Exception)
 def exception_handler(request, exc: Exception):
     errors = [
@@ -116,6 +118,7 @@ def exception_handler(request, exc: Exception):
         data=response(errors=errors),
         status=500
     )
+
 
 @api.exception_handler(Http404)
 def http_404_handler(request, exc: Exception):
@@ -134,11 +137,12 @@ def http_404_handler(request, exc: Exception):
 
 
 @api.exception_handler(InvalidReferenceException)
-def invalid_reference_handler(request, exc: Exception):
+def invalid_reference_handler(request, exc: InvalidReferenceException):
     errors = [
         {
             "type": "InvalidReference",
-            "message": str(exc)
+            "message": str(exc),
+            "field": exc.field
         }
     ]
 

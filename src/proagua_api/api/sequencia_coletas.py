@@ -90,11 +90,15 @@ def create_sequencia(request, payload: SequenciaColetasIn):
 @router.put("/{id_sequencia}", response=ResponseSchema[SequenciaColetasOut])
 def update_sequencia(request, id_sequencia: int, payload: SequenciaColetasIn):
     sequencia = get_object_or_404(models.SequenciaColetas, id=id_sequencia)
-    ponto = models.PontoColeta.objects.filter(pk=payload.ponto).first()
+    ponto = models.PontoColeta.objects.filter(pk=payload.ponto_id).first()
 
     # Check if the ponto exists
     if ponto is None:
-        raise InvalidReferenceException("Ponto", payload.ponto)
+        raise InvalidReferenceException(
+            ref_name='Ponto',
+            ref_id=payload.ponto_id, 
+            field='ponto'
+        )
 
     # Put the ponto object inside the payload data dictionary
     data = payload.dict()
