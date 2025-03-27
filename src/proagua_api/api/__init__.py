@@ -49,13 +49,25 @@ def validation_error_handler(request, exc: ValidationError):
 def integrity_error_handler(request, exc: IntegrityError):
     errors: list = []
     error_message = str(exc)
-
+    
     # Erro de chave única (valor duplicado)
     if "duplicate key value violates unique constraint" in error_message:
         match = re.search(r'unique constraint \"(.+?)\"', error_message)
         match_key = re.search(r'Key \((.+?)\)=\((.+?)\)', error_message)
         campo, valor = match_key.groups() if match_key else ("campo desconhecido", "valor já existente")
         error_message = f"O valor '{valor}' já existe no campo '{campo}'. Escolha um valor diferente!"
+
+        # Tratamento extra para chave composta
+        if ',' in campo:
+            campos = campo.split(',')
+            valores = valor.split(',')
+
+            for c, v in zip(campos, valores):
+                errors.append({
+                    "type": "IntegrityError",
+                    "message": f"O valor '{v}' já existe no campo '{c}'. Escolha um valor diferente!",
+                    "field": c
+                })
 
     # Erro de chave primária duplicada
     elif "UNIQUE constraint failed" in error_message:
