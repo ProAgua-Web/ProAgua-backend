@@ -128,7 +128,25 @@ def list_coletas_sequencia(request, id_sequencia: int):
     qs = models.Coleta.objects.filter(sequencia__id=id_sequencia)
     return response(
         data={
-            "data": qs,
+            "items": qs,
             "count": qs.count()
+        }
+    )
+
+
+@router.get("/{id_sequencia}/pontos", response=PaginatedResponseSchema[PontoColetaOut])
+def list_pontos_sequencia(request, id_sequencia: int):
+    sequencia = get_object_or_404(models.SequenciaColetas, pk=id_sequencia)
+    pontos: list[models.PontoColeta] = []
+    
+    ponto = sequencia.ponto
+    while ponto is not None:
+        pontos.append(ponto)
+        ponto = ponto.amontante
+    
+    return response(
+        data={
+            "items": pontos,
+            "count": len(pontos)
         }
     )
