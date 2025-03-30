@@ -24,7 +24,7 @@ router = Router(tags=["Pontos"])
 
 @router.get("", response=PaginatedResponseSchema[PontoColetaOut])
 @paginate(CustomPaginator)
-def list_ponto(request, filters: FilterPontos = Query(...)):
+def list_ponto(request, filters: Query[FilterPontos]):
     qs = models.PontoColeta.objects
     qs = qs.select_related("edificacao")
     qs = qs.prefetch_related("imagens", "edificacao__imagens")
@@ -52,7 +52,7 @@ def get_ponto(request, id_ponto: int):
 
 
 @router.post("/{id_ponto}/imagem")
-def upload_image(request, id_ponto: str, description: str = Form(...), file: UploadedFile = File(...)):
+def upload_image(request, id_ponto: str, description: Form[str], file: File[UploadedFile]):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
     img_path = save_file(f'media/images/pontos/ponto_{ponto.id}_{uuid.uuid4()}.png', file)

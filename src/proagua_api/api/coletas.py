@@ -22,7 +22,7 @@ router = Router(tags=["Coletas"])
 
 @router.get("", response=PaginatedResponseSchema[ColetaOut])
 @paginate(CustomPaginator)
-def list_coleta(request, filter: FilterColeta = Query(...)) -> List[ColetaOut]:
+def list_coleta(request, filter: Query[FilterColeta]) -> List[ColetaOut]:
     qs = models.Coleta.objects
     qs = qs.select_related("ponto", "ponto__edificacao")
     qs = qs.prefetch_related("ponto__imagens", "ponto__edificacao__imagens", "responsavel")
@@ -31,7 +31,7 @@ def list_coleta(request, filter: FilterColeta = Query(...)) -> List[ColetaOut]:
 
 
 @router.get("/csv")
-def get_coletas_csv(request, filter: FilterColeta = Query(...)):
+def get_coletas_csv(request, filter: Query[FilterColeta]):
     coletas = filter.filter(models.Coleta.objects.all().order_by("data"))
     csv_headers = [
         "id", "temperatura", "cloro_residual_livre", "turbidez", "coliformes_totais",
@@ -48,7 +48,7 @@ def get_coletas_csv(request, filter: FilterColeta = Query(...)):
 
 
 @router.get("/excel")
-def get_coletas_excel(request, filter: FilterColeta = Query(...)):
+def get_coletas_excel(request, filter: Query[FilterColeta]):
     coletas = filter.filter(models.Coleta.objects.all().order_by("data"))
     df = pd.DataFrame(list(coletas.values()))
     # Remove timezone information from the "data" column

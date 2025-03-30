@@ -40,7 +40,7 @@ router = Router(tags=["Solicitacoes"])
 
 @router.get("", response=PaginatedResponseSchema[SolicitacaoOut])
 @paginate(CustomPaginator)
-def list_solicitacoes(request, filters: FilterSolicitacao = Query(...)):
+def list_solicitacoes(request, filters: Query[FilterSolicitacao]):
     qs = models.Solicitacao.objects.all()
     return filters.filter(qs)
 

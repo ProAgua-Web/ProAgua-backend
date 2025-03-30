@@ -17,7 +17,7 @@ router = Router(tags=["Edificacoes"])
 
 @router.get("", response=PaginatedResponseSchema[EdificacaoOut])
 @paginate(CustomPaginator)
-def list_edificacoes(request, filters: FilterEdificacao = Query(...)):
+def list_edificacoes(request, filters: Query[FilterEdificacao]):
     qs = models.Edificacao.objects.all()
     qs = filters.filter(qs)
     return qs

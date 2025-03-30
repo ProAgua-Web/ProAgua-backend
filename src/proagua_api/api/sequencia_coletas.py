@@ -21,7 +21,7 @@ router = Router(tags=["Sequencias"])
 
 @router.get("", response=PaginatedResponseSchema[SequenciaColetasOut])
 @paginate(CustomPaginator)
-def list_sequencia(request, filter: FilterSequenciaColetas = Query(...)):
+def list_sequencia(request, filter: Query[FilterSequenciaColetas]):
     parametros = models.ParametrosReferencia.objects.first()
 
     # Consolidar select_related e prefetch_related
