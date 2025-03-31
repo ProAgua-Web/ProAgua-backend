@@ -16,9 +16,9 @@ from .pagination.pagination import paginate
 from .pagination.custom_paginator import CustomPaginator
 from .schemas.ponto_coleta import *
 from .schemas.coleta import ColetaOut
-from .schemas import PaginatedResponseSchema
+from .schemas import PaginatedResponseSchema, ResponseSchema
 from .. import models
-from .utils import save_file
+from .utils import save_file, response
 
 router = Router(tags=["Pontos"])
 
@@ -45,13 +45,13 @@ def list_ponto(request, filters: Query[FilterPontos]):
     return qs.all()
 
 
-@router.get("/{id_ponto}", response=PontoColetaOut)
+@router.get("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
 def get_ponto(request, id_ponto: int):
     qs = get_object_or_404(models.PontoColeta, id=id_ponto)
-    return qs
+    return response(data=qs)
 
 
-@router.post("/{id_ponto}/imagem")
+@router.post("/{id_ponto}/imagem", response=ResponseSchema[PontoColetaOut])
 def upload_image(request, id_ponto: str, description: Form[str], file: File[UploadedFile]):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
@@ -62,7 +62,7 @@ def upload_image(request, id_ponto: str, description: Form[str], file: File[Uplo
     ponto.imagens.add(image)
     ponto.save()
     
-    return {"success": True}
+    return response(data=ponto)
 
 
 @router.delete('/{id_ponto}/imagem/{id_imagem}')
@@ -78,24 +78,23 @@ def delete_image(request, id_ponto: str, id_imagem: uuid.UUID):
     return {"success": True}
 
 
-@router.post("")
+@router.post("", response=ResponseSchema[PontoColetaOut])
 def create_ponto(request, payload: PontoColetaIn):
     edificacao = get_object_or_404(models.Edificacao, codigo=payload.codigo_edificacao)
     amontante = get_object_or_404(models.PontoColeta, id=payload.amontante) if payload.amontante else None    
+    
     data_dict = payload.dict()
     data_dict.pop("codigo_edificacao")
     data_dict["edificacao"] = edificacao
     data_dict["amontante"] = amontante
+    
     ponto_coleta = models.PontoColeta.objects.create(**data_dict)
-
     ponto_coleta.save()
 
-    return {
-        "id": ponto_coleta.id,
-        "success": True
-    }
+    return response(data=ponto_coleta)
 
-@router.put("/{id_ponto}")
+
+@router.put("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
 def update_ponto(request, id_ponto: int, payload: PontoColetaIn):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
@@ -113,12 +112,12 @@ def update_ponto(request, id_ponto: int, payload: PontoColetaIn):
     for key, value in data_dict.items():
         setattr(ponto, key, value)
 
-
     ponto.save()
-    return {"success": True}
+
+    return response(data=ponto)
 
 
-@router.delete("/{id_ponto}")
+@router.delete("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
 def delete_ponto(request, id_ponto: int):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
@@ -126,13 +125,22 @@ def delete_ponto(request, id_ponto: int):
         raise HttpError(409, "Conflict: Related objects exist")
     
     ponto.delete()
-    return {"success": True}
+    ponto.id = id_ponto
+
+    return response(data=ponto)
 
 
-@router.get("/{id_ponto}/coletas", response=List[ColetaOut])
+@router.get("/{id_ponto}/coletas", response=PaginatedResponseSchema[ColetaOut])
 def list_coletas(request, id_ponto: int):
     """
     Retorna todas as coletas associadas a um ponto de coleta
     """
     qs = models.Coleta.objects.filter(ponto__id=id_ponto)
-    return qs
+    items = list(qs)
+
+    return response(
+        data={
+            "items": items,
+            "count": len(items)
+        }
+    )
