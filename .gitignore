@@ -24,3 +24,7 @@ src/datasync/*.xlsm
 
 # Uploaded files
 src/files/*
+
+# Arquivos excel
+*.xlsm
+*.xlsx
