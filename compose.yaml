@@ -1,5 +1,16 @@
 services:
+  backend:
+    container_name: "proagua-backend"
+    build: .
+    ports:
+      - 8000:8000
+    networks:
+      - mynet
+    depends_on:
+      - database
+  
   database:
+    container_name: "proagua-db"
     image: postgres:latest
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -7,3 +18,9 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - 5432:5432
+    networks:
+      - mynet
+
+networks:
+  mynet:
+    driver: bridge
