@@ -2,6 +2,7 @@ services:
   backend:
     container_name: "proagua-backend"
     build: .
+    image: proagua-backend:latest
     ports:
       - 8000:8000
     networks:
@@ -17,7 +18,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - 5432:5432
+      - ${DB_PORT}:5432
     networks:
       - mynet
 
