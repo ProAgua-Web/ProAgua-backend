@@ -193,11 +193,11 @@ def update_coleta(request, id_coleta: int, payload: ColetaIn):
     return response(data=coleta)
 
 
-@router.delete("/{id_coleta}", response=ResponseSchema[ColetaOut])
+@router.delete("/{id_coleta}", response=ResponseSchema)
 def delete_coleta(request, id_coleta: int):
     obj_coleta = get_object_or_404(models.Coleta, id=id_coleta)
     obj_coleta.delete()
-    return response(data=obj_coleta, errors=[])
+    return response(data={'id': id_coleta}, errors=[])
 
 
 @router.get("/{id_coleta}/responsaveis", response=List[UsuarioOut])

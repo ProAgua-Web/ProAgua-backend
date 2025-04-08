@@ -112,15 +112,13 @@ def update_sequencia(request, id_sequencia: int, payload: SequenciaColetasIn):
     return response(data=sequencia)
 
 
-@router.delete("/{id_sequencia}", response=ResponseSchema[SequenciaColetasOut])
+@router.delete("/{id_sequencia}", response=ResponseSchema)
 def delete_sequencia(request, id_sequencia: int):
     sequencia = get_object_or_404(models.SequenciaColetas, id=id_sequencia)
     if models.SequenciaColetas.has_dependent_objects(sequencia):
         raise HttpError(409, "Conflict: Related objects exist")
     sequencia.delete()
-    
-    sequencia.id = id_sequencia # Definir id de sequencia para contornar erro de validação
-    return response(data=sequencia)
+    return response(data={'id': id_sequencia})
 
 
 @router.get("/{id_sequencia}/coletas", response=PaginatedResponseSchema[ColetaOut])

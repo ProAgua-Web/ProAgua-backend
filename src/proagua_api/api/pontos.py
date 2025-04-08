@@ -117,7 +117,7 @@ def update_ponto(request, id_ponto: int, payload: PontoColetaIn):
     return response(data=ponto)
 
 
-@router.delete("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
+@router.delete("/{id_ponto}", response=ResponseSchema)
 def delete_ponto(request, id_ponto: int):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
@@ -125,9 +125,7 @@ def delete_ponto(request, id_ponto: int):
         raise HttpError(409, "Conflict: Related objects exist")
     
     ponto.delete()
-    ponto.id = id_ponto
-
-    return response(data=ponto)
+    return response(data={'id': id_ponto})
 
 
 @router.get("/{id_ponto}/coletas", response=PaginatedResponseSchema[ColetaOut])

@@ -47,4 +47,4 @@ def update_usuario(request, username: str, payload: UsuarioUpdate):
 def delete_usuario(request, username: str):
     user = get_object_or_404(User, username=username)
     user.delete()
-    return response(data=user)
+    return response(data={'id': user.pk})

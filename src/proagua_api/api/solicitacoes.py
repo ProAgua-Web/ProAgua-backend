@@ -90,11 +90,11 @@ def update_solicitacao(request, id: int, payload: SolicitacaoUpdate):
     return response(data=solicitacao)
 
 
-@router.delete("/{id}", response=ResponseSchema[SolicitacaoOut])
+@router.delete("/{id}", response=ResponseSchema)
 def delete_solicitacao(request, id: int):
     solicitacao = get_object_or_404(models.Solicitacao, id=id)
     solicitacao.delete()
-    return response(data=solicitacao)
+    return response(data={'id': id})
 
 
 @router.get("/{id}/document")

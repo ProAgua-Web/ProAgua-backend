@@ -74,7 +74,7 @@ def update_edificacoes(request, cod_edificacao: str, payload: EdificacaoIn):
     return response(data=edificacao)
 
 
-@router.delete("/{cod_edificacao}", response=ResponseSchema[EdificacaoOut])
+@router.delete("/{cod_edificacao}", response=ResponseSchema)
 def delete_edificacao(request, cod_edificacao: str):
     edificacao = get_object_or_404(models.Edificacao, codigo=cod_edificacao)
 
@@ -82,7 +82,7 @@ def delete_edificacao(request, cod_edificacao: str):
         raise HttpError(409, "Conflict: Related objects exist")
 
     edificacao.delete()
-    return response(data=edificacao)
+    return response(data={"id": cod_edificacao})
 
 
 @router.get("/{cod_edificacao}/pontos", response=PaginatedResponseSchema[PontoColetaOut])
