@@ -52,11 +52,11 @@ def get_solicitacao(request, id: int):
 
 
 @router.post("/{id}/imagem")
-def upload_image(request, id: int, description: str = Form(...), file: UploadedFile = File(...)):
+def upload_image(request, id: int, description: Form[str], file: File[UploadedFile]):
     solicitacao = get_object_or_404(models.Solicitacao, id=id)
 
     img_path = save_file(f'media/images/solicitacoes/solicitacao_{solicitacao.id}_{uuid.uuid4()}.png', file)
-    image = models.Image.objects.create(file=img_path, description=description)
+    image = models.Image.objects.create(src=img_path, description=description)
     image.save()
 
     solicitacao.imagens.add(image)
