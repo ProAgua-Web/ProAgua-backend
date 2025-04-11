@@ -6,6 +6,7 @@ import os
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from ninja import Router, Query, UploadedFile, File, Form
+from ninja.errors import HttpError
 
 from .pagination.pagination import paginate
 from .pagination.custom_paginator import CustomPaginator
@@ -61,6 +62,20 @@ def upload_image(request, id: int, description: Form[str], file: File[UploadedFi
 
     solicitacao.imagens.add(image)
     solicitacao.save()
+
+    return {"success": True}
+
+
+@router.delete("/{id_solicitacao}/imagem/{id_imagem}")
+def delete_image(request, id_solicitacao: str, id_imagem: uuid.UUID):
+    solicitacao = get_object_or_404(models.Solicitacao, pk=id_solicitacao)
+    image: models.Image | None = solicitacao.imagens.filter(id=id_imagem).first()
+
+    if image is None:
+        return HttpError(404, "Not found")
+    
+    image.src.delete()
+    image.delete()
 
     return {"success": True}
 
