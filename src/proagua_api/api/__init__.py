@@ -8,8 +8,8 @@ from ninja.errors import ValidationError
 from ninja.errors import HttpError
 from django.db.utils import IntegrityError
 
-from proagua_api.api.exceptions.invalid_reference import InvalidReferenceException
-
+from .exceptions.invalid_reference import InvalidReferenceException
+from .exceptions.generic_exception import GenericException
 from . import (
     auth,
     edificacoes,
@@ -119,6 +119,22 @@ def http_error_handler(request, exc: HttpError):
         status=exc.status_code
     )
 
+
+@api.exception_handler(GenericException)
+def generic_exception_handler(request, exc: GenericException):
+    errors = [
+        {
+            "type": exc.type,
+            "message":  exc.message,
+            "field": exc.field,
+        }
+    ]
+
+    return api.create_response(
+        request=request,
+        data=response(errors=errors),
+        status=500
+    )
 
 @api.exception_handler(Exception)
 def exception_handler(request, exc: Exception):

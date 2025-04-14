@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout
@@ -7,11 +8,11 @@ from django.http import JsonResponse, HttpResponse
 from ninja.security import APIKeyCookie
 from ninja import Router
 from ninja import Schema
-from typing import Any
-
-
 import jwt
 from jwt import DecodeError, ExpiredSignatureError
+
+from .utils import response
+from .exceptions.generic_exception import GenericException
 
 router = Router(tags=["Authentication"])
 
@@ -56,12 +57,12 @@ def generate_auth_token(user: User) -> tuple[dict[str, Any], str] | None:
         seconds=settings.JWT_EXPIRATION_TIME['seconds']
     )
 
-    payload={
-            "id": user.id,
-            "username": user.username,
-            "iat": int(issued_at.timestamp()),
-            "exp": int(expiration_time.timestamp())
-        }
+    payload = {
+        "id": user.id,
+        "username": user.username,
+        "iat": int(issued_at.timestamp()),
+        "exp": int(expiration_time.timestamp())
+    }
 
     token = jwt.encode(
         payload=payload,
@@ -83,24 +84,27 @@ class LoginCredentialsSchema(Schema):
 @router.post("/login", auth=None)
 def login(request, credentials: LoginCredentialsSchema):
     user = authenticate(request, **credentials.dict())
-    if user is not None:
-        (payload, token) = generate_auth_token(user)
-        response = JsonResponse({
-            "id": payload["id"],
-            "username": payload["username"],
-            "created": payload["iat"],
-            "expiration": payload["exp"],
-            "accessToken": token,
-        })
-        response.set_cookie(
-            key="access_token",
-            value=token,
-            httponly=True,
-            secure=True, 
-            samesite='None'
-        )
-        
-        return response
+    
+    if user is None:
+        raise GenericException("AuthError", "Credenciais inválidas.")
+
+    payload, token = generate_auth_token(user)
+    resp = JsonResponse(response(data={
+        "id": payload["id"],
+        "username": payload["username"],
+        "created": payload["iat"],
+        "expiration": payload["exp"],
+        "accessToken": token,
+    }))
+    resp.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        secure=True, 
+        samesite='None'
+    )
+    
+    return resp    
 
 
 class TokenSchema(Schema):
