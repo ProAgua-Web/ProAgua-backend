@@ -1,6 +1,3 @@
-from typing import List
-import time
-
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Count, Subquery, OuterRef
 from ninja import Router, Query
@@ -8,13 +5,13 @@ from ninja.errors import HttpError
 
 from proagua_api.api.exceptions.invalid_reference import InvalidReferenceException
 
-from .pagination.pagination import paginate
-from .pagination.custom_paginator import CustomPaginator
-from .. import models
-from .schemas.sequencia_coletas import *
-from .schemas import ResponseSchema, PaginatedResponseSchema
-from .utils import response
-from ..services import sequencia_coletas as service_sequencia_coleta
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...schemas.sequencia_coletas import *
+from ...schemas import ResponseSchema, PaginatedResponseSchema
+from ...utils import response
+from .... import models
+from ....services import sequencia_coletas as service_sequencia_coleta
 
 router = Router(tags=["Sequencias"])
 

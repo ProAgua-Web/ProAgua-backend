@@ -8,15 +8,15 @@ from django.http import FileResponse
 from ninja import Router, Query
 import pandas as pd
 
-from .exceptions.invalid_reference import InvalidReferenceException
+from ...exceptions.invalid_reference import InvalidReferenceException
 
-from .schemas.coleta import *
-from .schemas.usuario import UsuarioOut
-from .schemas import ResponseSchema, PaginatedResponseSchema
-from .. import models
-from .pagination.pagination import paginate
-from .pagination.custom_paginator import CustomPaginator
-from .utils import response
+from ...schemas.coleta import *
+from ...schemas.usuario import UsuarioOut
+from ...schemas import ResponseSchema, PaginatedResponseSchema
+from .... import models
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...utils import response
 
 router = Router(tags=["Coletas"])
 
@@ -132,7 +132,7 @@ def get_coletas_excel(request, filter: Query[FilterColeta]):
 @router.get("/{id_coleta}", response=ResponseSchema[ColetaOut])
 def get_coleta(request, id_coleta: int):
     qs = get_object_or_404(models.Coleta, id=id_coleta)
-    return response(data=qs)
+    return response(data=qs) # type: ignore
 
 
 @router.post("", response=ResponseSchema[ColetaOut])
@@ -140,7 +140,7 @@ def create_coleta(request, payload: ColetaIn):
     data_dict = payload.dict()
     responsavel_ids = data_dict.get("responsavel", [])
 
-    # Removendo a lista de responsáveis do dicionário para criar a instância da Coleta
+    # Removendo a lista de responsáveis do dic# type: ignoreionário para criar a instância da Coleta
     del data_dict["responsavel"]
 
     sequencia = models.SequenciaColetas.objects.filter(pk=data_dict.get("sequencia_id")).first()
@@ -165,7 +165,7 @@ def create_coleta(request, payload: ColetaIn):
         if user:
             coleta.responsavel.add(user)
 
-    return response(data=coleta)
+    return response(data=coleta) # type: ignore
 
 
 @router.put("/{id_coleta}", response=ResponseSchema[ColetaOut])
@@ -190,7 +190,7 @@ def update_coleta(request, id_coleta: int, payload: ColetaIn):
 
     coleta.save()
 
-    return response(data=coleta)
+    return response(data=coleta) # type: ignore
 
 
 @router.delete("/{id_coleta}", response=ResponseSchema)
@@ -203,4 +203,4 @@ def delete_coleta(request, id_coleta: int):
 @router.get("/{id_coleta}/responsaveis", response=List[UsuarioOut])
 def get_responsaveis_coleta(request, id_coleta: int):
     coleta = get_object_or_404(models.Coleta, id=id_coleta)
-    return response(data=coleta.responsavel)
+    return response(data=coleta.responsavel) # type: ignore

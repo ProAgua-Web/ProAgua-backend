@@ -5,19 +5,20 @@ from django.shortcuts import get_object_or_404
 from ninja import Router, Query, UploadedFile, File, Form
 from ninja.errors import HttpError
 
-from .schemas import ResponseSchema, PaginatedResponseSchema
-from .schemas.edficacao import *
-from .schemas.ponto_coleta import PontoColetaOut
-from .. import models
-from .utils import save_file, response
-from .pagination.pagination import paginate
-from .pagination.custom_paginator import CustomPaginator
+from ...schemas import ResponseSchema, PaginatedResponseSchema
+from ...schemas.edficacao import *
+from ...schemas.ponto_coleta import PontoColetaOut
+from ...utils import save_file, response
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from .... import models
 
 router = Router(tags=["Edificacoes"])
 
 @router.get("", response=PaginatedResponseSchema[EdificacaoOut])
 @paginate(CustomPaginator)
 def list_edificacoes(request, filters: Query[FilterEdificacao]):
+    """Endpoint público para listar todas as edificações"""
     qs = models.Edificacao.objects.all()
     qs = filters.filter(qs)
     return qs

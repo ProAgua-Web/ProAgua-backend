@@ -12,43 +12,41 @@ from django.shortcuts import get_object_or_404
 from ninja import Router, Query, UploadedFile, File, Form
 from ninja.errors import HttpError
 
-from .pagination.pagination import paginate
-from .pagination.custom_paginator import CustomPaginator
-from .schemas.ponto_coleta import *
-from .schemas.coleta import ColetaOut
-from .schemas import PaginatedResponseSchema, ResponseSchema
-from .. import models
-from .utils import save_file, response
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...schemas.ponto_coleta import *
+from ...schemas.coleta import ColetaOut
+from ...schemas import PaginatedResponseSchema, ResponseSchema
+from ...utils import save_file, response
+from .... import models
 
 router = Router(tags=["Pontos"])
 
 @router.get("", response=PaginatedResponseSchema[PontoColetaOut])
 @paginate(CustomPaginator)
 def list_ponto(request, filters: Query[FilterPontos]):
+    """Endpoint público para listagem de pontos"""
+
     qs = models.PontoColeta.objects
     qs = qs.select_related("edificacao")
     qs = qs.prefetch_related("imagens", "edificacao__imagens")
-
-    if filters.q:
-        qs = qs.filter(
-            Q(localizacao__contains=filters.q) | Q(edificacao__nome__contains=filters.q) | Q(edificacao__codigo__contains=filters.q))
-        
-    if filters.edificacao__campus:
-        qs = qs.filter(edificacao__campus=filters.edificacao__campus)
-
-    if filters.tipo:
-        qs = qs.filter(tipo__in=filters.tipo)
-
-    if filters.status:
-        pass
+    qs = filters.filter(qs)
 
     return qs.all()
 
 
 @router.get("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
 def get_ponto(request, id_ponto: int):
+    """ Endpoint publico para busca de um ponto"""
     qs = get_object_or_404(models.PontoColeta, id=id_ponto)
-    return response(data=qs)
+    return response(data=qs) # type: ignore
+
+
+@router.get("/{id_ponto}/coleta", response=ResponseSchema[ColetaOut])
+def get_coleta(request, id_ponto: int):
+    """Endpoins público que retorna a última coleta pública realizada no ponto"""
+    coleta = get_object_or_404(models.Coleta, ponto_id=id_ponto, publico=True)
+    return response(data=coleta) # type: ignore
 
 
 @router.post("/{id_ponto}/imagem", response=ResponseSchema[PontoColetaOut])
@@ -62,7 +60,7 @@ def upload_image(request, id_ponto: str, description: Form[str], file: File[Uplo
     ponto.imagens.add(image)
     ponto.save()
     
-    return response(data=ponto)
+    return response(data=ponto) # type: ignore
 
 
 @router.delete('/{id_ponto}/imagem/{id_imagem}')
@@ -91,7 +89,7 @@ def create_ponto(request, payload: PontoColetaIn):
     ponto_coleta = models.PontoColeta.objects.create(**data_dict)
     ponto_coleta.save()
 
-    return response(data=ponto_coleta)
+    return response(data=ponto_coleta) # type: ignore
 
 
 @router.put("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
@@ -114,7 +112,7 @@ def update_ponto(request, id_ponto: int, payload: PontoColetaIn):
 
     ponto.save()
 
-    return response(data=ponto)
+    return response(data=ponto) # type: ignore
 
 
 @router.delete("/{id_ponto}", response=ResponseSchema)
@@ -127,12 +125,7 @@ def delete_ponto(request, id_ponto: int):
     ponto.delete()
     return response(data={'id': id_ponto})
 
-
-@router.get("/{id_ponto}/coletas", response=PaginatedResponseSchema[ColetaOut])
-def list_coletas(request, id_ponto: int):
-    """
-    Retorna todas as coletas associadas a um ponto de coleta
-    """
+    """Retorna todas as coletas associadas a um ponto de coleta"""
     qs = models.Coleta.objects.filter(ponto__id=id_ponto)
     items = list(qs)
 

@@ -6,9 +6,8 @@ Material de referência:
 
 from ninja import Router
 
-from .. import models
-
-from .schemas.parametros_referencia import ParametrosReferenciaIn, ParametrosReferenciaOut
+from .... import models
+from ...schemas.parametros_referencia import ParametrosReferenciaIn, ParametrosReferenciaOut
 
 router = Router(tags=["ParametrosReferencia"])
 

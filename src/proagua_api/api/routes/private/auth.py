@@ -11,8 +11,8 @@ from ninja import Schema
 import jwt
 from jwt import DecodeError, ExpiredSignatureError
 
-from .utils import response
-from .exceptions.generic_exception import GenericException
+from ...utils import response
+from ...exceptions.generic_exception import GenericException
 
 router = Router(tags=["Authentication"])
 

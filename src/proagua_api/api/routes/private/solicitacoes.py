@@ -1,37 +1,29 @@
-from typing import List, Dict
 import uuid
-from datetime import datetime
-import os
 
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from ninja import Router, Query, UploadedFile, File, Form
 from ninja.errors import HttpError
 
-from .pagination.pagination import paginate
-from .pagination.custom_paginator import CustomPaginator
-from .schemas.solicitacao import (
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...utils import save_file
+from ...utils import response
+from .... import models
+
+from ...schemas.solicitacao import (
     SolicitacaoIn,
     SolicitacaoOut,
     FilterSolicitacao,
     SolicitacaoUpdate
 )
-from .schemas.ponto_coleta import (
-    PontoColetaIn,
-    PontoColetaOut,
-)
-from .. import models
-from .utils import save_file
-from .schemas import (
+from ...schemas import (
     ResponseSchema,
     PaginatedResponseSchema,
 )
-from .utils import response
 
 from docx import Document
-from docx.shared import Pt, Inches
-from docx.oxml.ns import qn, nsdecls
-from docx.oxml import OxmlElement, parse_xml
+from docx.shared import Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.table import WD_ALIGN_VERTICAL
 from io import BytesIO

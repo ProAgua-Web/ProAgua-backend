@@ -1,14 +1,12 @@
-from typing import List
-
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from ninja import Router
 
-from .pagination.pagination import paginate
-from .pagination.custom_paginator import CustomPaginator
-from .schemas import ResponseSchema, PaginatedResponseSchema
-from .schemas.usuario import UsuarioOut, UsuarioIn, UsuarioUpdate
-from .utils import response
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...schemas import ResponseSchema, PaginatedResponseSchema
+from ...schemas.usuario import UsuarioOut, UsuarioIn, UsuarioUpdate
+from ...utils import response
 
 router = Router(tags=["Usuarios"])
 
