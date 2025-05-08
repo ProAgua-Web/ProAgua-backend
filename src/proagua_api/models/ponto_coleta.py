@@ -30,7 +30,7 @@ class PontoColeta(models.Model):
     tipo = models.IntegerField(
         verbose_name="tipo",
         choices=TIPOS_PONTOS,
-        default=(1, "Bebedouro")
+        default=TIPOS_PONTOS[0] # type: ignore
     )
 
     amontante = models.ForeignKey(
