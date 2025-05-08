@@ -19,6 +19,7 @@ class ColetaIn(Schema):
     data: datetime
     responsavel: List[int]
     ordem: int
+    publico: bool
 
 
 class ColetaOut(Schema):
@@ -35,6 +36,7 @@ class ColetaOut(Schema):
     sequencia_id: int
     ponto: PontoColetaOut
     status: Optional[bool] = None
+    publico: bool
     # status_messages: Optional[List[str]] = None
 
     @staticmethod

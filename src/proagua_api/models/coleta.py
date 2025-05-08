@@ -2,9 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-import csv
-from io import StringIO
-
 from .parametros_referencia import ParametrosReferencia
 
 BEBEDOURO = 1
@@ -73,13 +70,13 @@ class Coleta(models.Model):
         default=None,
         null=True,
     )
-
     status_message = models.CharField(
         verbose_name="status message",
         max_length=200,
         default=None,
         null=True
     )
+    publico = models.BooleanField(default=False)
 
     def analise(self):
         status_temperatura = self.analise_temperatura()
