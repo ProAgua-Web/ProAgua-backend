@@ -71,13 +71,13 @@ def integrity_error_handler(request, exc: IntegrityError):
         error_message = "Parece que está tentando referenciar algo que não existe! Verifique os dados antes de salvar."
 
     # Erro de campo obrigatório (`NOT NULL`)
-    elif "NOT NULL constraint failed" in error_message:
-        match = re.search(r'NOT NULL constraint failed: (.+?)\.', error_message)
-        field = match.group(1) if match else "um campo obrigatório"
+    elif "null value in column" in error_message:
+        match = re.search(r'null value in column "(.+)" of relation', error_message)
+        field = match.group(1) if match else "UNKNOW_FIELD"
         error_message = f"O campo '{field}' é obrigatório! Certifique-se de preenchê-lo antes de continuar."
     else:
         error_message = "Ocorreu um erro."
-    
+        
     errors.append({
         "type": "IntegrityError",
         "message": error_message,
