@@ -76,7 +76,7 @@ class Coleta(models.Model):
         default=None,
         null=True
     )
-    publico = models.BooleanField(default=False)
+    publico = models.BooleanField(default=False, null=True)
 
     def analise(self):
         status_temperatura = self.analise_temperatura()
