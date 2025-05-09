@@ -11,6 +11,7 @@ from .exceptions.invalid_reference import InvalidReferenceException
 from .exceptions.generic_exception import GenericException
 from .utils import response
 from .routes.private import private_router
+from .routes.public import public_router
 
 api = NinjaAPI()
 
@@ -181,3 +182,4 @@ def get_csrf_token(request):
 
 
 api.add_router('', private_router)
+api.add_router('/public', public_router)
