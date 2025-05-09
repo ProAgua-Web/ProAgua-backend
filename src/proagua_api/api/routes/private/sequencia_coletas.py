@@ -11,7 +11,7 @@ from ...schemas.sequencia_coletas import *
 from ...schemas import ResponseSchema, PaginatedResponseSchema
 from ...utils import response
 from .... import models
-from ....services import sequencia_coletas as service_sequencia_coleta
+from ....services import avaliar
 
 router = Router(tags=["Sequencias"])
 
@@ -58,8 +58,7 @@ def list_sequencia(request, filter: Query[FilterSequenciaColetas]):
     qs = filter.filter(qs)
 
     # Retornar resultado
-    qs = service_sequencia_coleta.set_status(qs, parametros)
-    qs = service_sequencia_coleta.write_message(qs, parametros)
+    qs = avaliar.avaliar_lista(qs, parametros)
     
     return qs
 
