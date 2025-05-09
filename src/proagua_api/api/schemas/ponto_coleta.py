@@ -1,31 +1,29 @@
-from typing import Optional, ForwardRef, List
+from typing import Optional, List
 
 from ninja import Schema, FilterSchema, Field
 from .edficacao import EdificacaoOut
 from .image import ImageOut
-
-PontoColetaInRef = ForwardRef('PontoColetaIn')
-PontoColetaOutRef = ForwardRef('PontoColetaOut')
 
 
 class PontoColetaIn(Schema):
     codigo_edificacao: str
     tipo: int
     localizacao: Optional[str] = None
-    amontante: Optional[int] = None
+    amontante_id: Optional[int] = None
     observacao: Optional[str] = None
     tombo: Optional[str] = None
     quantidade: Optional[int] = None # unico, duplo, triplo
     capacidade: Optional[int] = None
     material: Optional[str] = None
     fonte_informacao: Optional[str] = None
-    
+
 
 class PontoColetaOut(Schema):
     id: int
     edificacao: EdificacaoOut
     tipo: int
     localizacao: Optional[str] = None
+    amontante: Optional['PontoColetaOut'] = None
     imagens: List[ImageOut]
     tombo: Optional[str] = None
     quantidade: Optional[int] = None # unico, duplo, triplo
@@ -54,5 +52,5 @@ class FilterPontos(FilterSchema):
     # status: Optional[bool] = Field(default=None)
 
 
-PontoColetaIn.update_forward_refs()
-PontoColetaOut.update_forward_refs()
+PontoColetaIn.model_rebuild()
+PontoColetaOut.model_rebuild()

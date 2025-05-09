@@ -39,7 +39,7 @@ def list_ponto(request, filters: Query[FilterPontos]):
 def get_ponto(request, id_ponto: int):
     """ Endpoint publico para busca de um ponto"""
     qs = get_object_or_404(models.PontoColeta, id=id_ponto)
-    return response(data=qs) # type: ignore
+    return response(data=qs)
 
 
 @router.get("/{id_ponto}/coleta", response=ResponseSchema[ColetaOut])
@@ -60,7 +60,7 @@ def upload_image(request, id_ponto: str, description: Form[str], file: File[Uplo
     ponto.imagens.add(image)
     ponto.save()
     
-    return response(data=ponto) # type: ignore
+    return response(data=ponto)
 
 
 @router.delete('/{id_ponto}/imagem/{id_imagem}')
@@ -79,7 +79,7 @@ def delete_image(request, id_ponto: str, id_imagem: uuid.UUID):
 @router.post("", response=ResponseSchema[PontoColetaOut])
 def create_ponto(request, payload: PontoColetaIn):
     edificacao = get_object_or_404(models.Edificacao, codigo=payload.codigo_edificacao)
-    amontante = get_object_or_404(models.PontoColeta, id=payload.amontante) if payload.amontante else None    
+    amontante = get_object_or_404(models.PontoColeta, id=payload.amontante_id) if payload.amontante_id else None    
     
     data_dict = payload.dict()
     data_dict.pop("codigo_edificacao")
@@ -89,7 +89,7 @@ def create_ponto(request, payload: PontoColetaIn):
     ponto_coleta = models.PontoColeta.objects.create(**data_dict)
     ponto_coleta.save()
 
-    return response(data=ponto_coleta) # type: ignore
+    return response(data=ponto_coleta)
 
 
 @router.put("/{id_ponto}", response=ResponseSchema[PontoColetaOut])
@@ -112,7 +112,7 @@ def update_ponto(request, id_ponto: int, payload: PontoColetaIn):
 
     ponto.save()
 
-    return response(data=ponto) # type: ignore
+    return response(data=ponto)
 
 
 @router.delete("/{id_ponto}", response=ResponseSchema)
