@@ -22,6 +22,7 @@ from .... import models
 
 router = Router(tags=["Pontos"])
 
+
 @router.get("", response=PaginatedResponseSchema[PontoColetaOut])
 @paginate(CustomPaginator)
 def list_ponto(request, filters: Query[FilterPontos]):
@@ -46,20 +47,21 @@ def get_ponto(request, id_ponto: int):
 def get_coleta(request, id_ponto: int):
     """Endpoins público que retorna a última coleta pública realizada no ponto"""
     coleta = get_object_or_404(models.Coleta, ponto_id=id_ponto, publico=True)
-    return response(data=coleta) # type: ignore
+    return response(data=coleta)  # type: ignore
 
 
 @router.post("/{id_ponto}/imagem", response=ResponseSchema[PontoColetaOut])
 def upload_image(request, id_ponto: str, description: Form[str], file: File[UploadedFile]):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
-    img_path = save_file(f'media/images/pontos/ponto_{ponto.id}_{uuid.uuid4()}.png', file)
+    img_path = save_file(
+        f'media/images/pontos/ponto_{ponto.id}_{uuid.uuid4()}.png', file)
     image = models.Image.objects.create(src=img_path, description=description)
     image.save()
 
     ponto.imagens.add(image)
     ponto.save()
-    
+
     return response(data=ponto)
 
 
@@ -67,10 +69,10 @@ def upload_image(request, id_ponto: str, description: Form[str], file: File[Uplo
 def delete_image(request, id_ponto: str, id_imagem: uuid.UUID):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
     image: models.Image = ponto.imagens.filter(id=id_imagem).first()
-    
+
     if image is None:
         return HttpError(404, "Not found")
-    
+
     image.src.delete()
     image.delete()
     return {"success": True}
@@ -78,14 +80,16 @@ def delete_image(request, id_ponto: str, id_imagem: uuid.UUID):
 
 @router.post("", response=ResponseSchema[PontoColetaOut])
 def create_ponto(request, payload: PontoColetaIn):
-    edificacao = get_object_or_404(models.Edificacao, codigo=payload.codigo_edificacao)
-    amontante = get_object_or_404(models.PontoColeta, id=payload.amontante_id) if payload.amontante_id else None    
-    
+    edificacao = get_object_or_404(
+        models.Edificacao, codigo=payload.codigo_edificacao)
+    amontante = get_object_or_404(
+        models.PontoColeta, id=payload.amontante_id) if payload.amontante_id else None
+
     data_dict = payload.dict()
     data_dict.pop("codigo_edificacao")
     data_dict["edificacao"] = edificacao
     data_dict["amontante"] = amontante
-    
+
     ponto_coleta = models.PontoColeta.objects.create(**data_dict)
     ponto_coleta.save()
 
@@ -97,10 +101,12 @@ def update_ponto(request, id_ponto: int, payload: PontoColetaIn):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
 
     amontante = None
-    if payload.amontante is not None:
-        amontante = get_object_or_404(models.PontoColeta, id=payload.amontante)
+    if payload.amontante_id is not None:
+        amontante = get_object_or_404(
+            models.PontoColeta, id=payload.amontante_id)
 
-    edificacao = get_object_or_404(models.Edificacao, codigo=payload.codigo_edificacao)
+    edificacao = get_object_or_404(
+        models.Edificacao, codigo=payload.codigo_edificacao)
 
     data_dict = payload.dict()
     data_dict.pop("codigo_edificacao")
@@ -121,7 +127,7 @@ def delete_ponto(request, id_ponto: int):
 
     if models.PontoColeta.has_dependent_objects(ponto):
         raise HttpError(409, "Conflict: Related objects exist")
-    
+
     ponto.delete()
     return response(data={'id': id_ponto})
 
