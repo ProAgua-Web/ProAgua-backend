@@ -76,9 +76,18 @@ def delete_image(request, id_solicitacao: str, id_imagem: uuid.UUID):
 def create_solicitacao(request, payload: SolicitacaoIn):
     data = payload.dict()
     ponto = get_object_or_404(models.PontoColeta, id=data.pop("ponto_id"))
+    
     data["ponto"] = ponto
+    data.pop('imagens')
+    
     solicitacao = models.Solicitacao.objects.create(**data)
+
+    for img in payload.imagens:
+        img_obj = get_object_or_404(models.Image, id=img.id)
+        solicitacao.imagens.add(img_obj)
+    
     solicitacao.save()
+    
     return response(data=solicitacao)
 
 

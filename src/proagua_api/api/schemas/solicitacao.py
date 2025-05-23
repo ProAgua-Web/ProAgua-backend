@@ -12,6 +12,7 @@ class SolicitacaoIn(Schema):
     tipo: str
     objetivo: Optional[str] = None
     justificativa: Optional[str] = None
+    imagens: List[ImageOut]
     status: str
 
 class SolicitacaoOut(Schema):
