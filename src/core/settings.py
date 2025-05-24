@@ -191,3 +191,5 @@ CORS_ALLOW_CREDENTIALS = True
 
 # SESSION_COOKIE_DOMAIN = 'pro-agua-frontend.vercel.app'
 # CSRF_COOKIE_DOMAIN = 'pro-agua-frontend.vercel.app'
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 10000
