@@ -51,7 +51,7 @@ class Command(BaseCommand):
         return edificacao
 
     def create_ponto(self, tipo, localizacao, tombo, edificacao):
-        tipo = 1 if 'bebedouro' in tipo else 2
+        tipo = 0 if 'bebedouro' in tipo else 1
         tombo = extract_digits(tombo)
         tombo = tombo.strip() if tombo else tombo
         localizacao = localizacao.strip() if localizacao else localizacao
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                             for responsavel in responsaveis.split()]
             responsaveis = [self.create_responsavel(
                 responsavel) for responsavel in responsaveis]
-            
+
             return responsaveis
         return []
 

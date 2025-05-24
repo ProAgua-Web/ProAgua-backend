@@ -1,35 +1,37 @@
 from typing import List
+from io import BytesIO
+from io import StringIO
 
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.http import FileResponse
 from ninja import Router, Query
-from ninja.pagination import paginate
-
-from io import BytesIO
-from io import StringIO
-
-from .schemas.coleta import *
-from .schemas.usuario import UsuarioOut
-from .. import models
-
 import pandas as pd
+
+from ...exceptions.invalid_reference import InvalidReferenceException
+
+from ...schemas.coleta import *
+from ...schemas.usuario import UsuarioOut
+from ...schemas import ResponseSchema, PaginatedResponseSchema
+from .... import models
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...utils import response
 
 router = Router(tags=["Coletas"])
 
-
-@router.get("", response=List[ColetaOut])
-@paginate
-def list_coleta(request, filter: FilterColeta = Query(...)):
+@router.get("", response=PaginatedResponseSchema[ColetaOut])
+@paginate(CustomPaginator)
+def list_coleta(request, filter: Query[FilterColeta]) -> List[ColetaOut]:
     qs = models.Coleta.objects
     qs = qs.select_related("ponto", "ponto__edificacao")
     qs = qs.prefetch_related("ponto__imagens", "ponto__edificacao__imagens", "responsavel")
+    qs = filter.filter(qs).order_by("data")
+    return qs # type: ignore
 
-    return filter.filter(qs).order_by("data")
 
-
-@router.get("/csv", response=List[ColetaOut])
-def get_coletas_csv(request, filter: FilterColeta = Query(...)):
+@router.get("/csv")
+def get_coletas_csv(request, filter: Query[FilterColeta]):
     coletas = filter.filter(models.Coleta.objects.all().order_by("data"))
     csv_headers = [
         "id", "temperatura", "cloro_residual_livre", "turbidez", "coliformes_totais",
@@ -45,8 +47,8 @@ def get_coletas_csv(request, filter: FilterColeta = Query(...)):
     return FileResponse(BytesIO(csv_file.getvalue().encode()), as_attachment=True, filename="coletas.csv")
 
 
-@router.get("/excel", response=List[ColetaOut])
-def get_coletas_excel(request, filter: FilterColeta = Query(...)):
+@router.get("/excel")
+def get_coletas_excel(request, filter: Query[FilterColeta]):
     coletas = filter.filter(models.Coleta.objects.all().order_by("data"))
     df = pd.DataFrame(list(coletas.values()))
     # Remove timezone information from the "data" column
@@ -57,12 +59,12 @@ def get_coletas_excel(request, filter: FilterColeta = Query(...)):
 
     df = df.rename(columns={
         "id": "ID",
-        "temperatura": "Temperatura",
-        "cloro_residual_livre": "Cloro Residual Livre",
-        "turbidez": "Turbidez",
-        "coliformes_totais": "Coliformes Totais",
-        "escherichia": "Escherichia coli",
-        "cor": "Cor Aparente",
+        "temperatura": "Temperatura (°C)",
+        "cloro_residual_livre": "Cloro Residual Livre (mg/L)",
+        "turbidez": "Turbidez (uT)",
+        "coliformes_totais": "Coliformes Totais (/100mL)",
+        "escherichia": "Escherichia coli (/100mL)",
+        "cor": "Cor Aparente (uH)",
         "data": "Data",
         "ordem": "Ordem",
         "sequencia_id": "ID Sequência",
@@ -127,41 +129,48 @@ def get_coletas_excel(request, filter: FilterColeta = Query(...)):
     return FileResponse(excel_file, as_attachment=True, filename="coletas.xlsx")
 
 
-@router.get("/{id_coleta}", response=ColetaOut)
+@router.get("/{id_coleta}", response=ResponseSchema[ColetaOut])
 def get_coleta(request, id_coleta: int):
     qs = get_object_or_404(models.Coleta, id=id_coleta)
-    return qs
+    return response(data=qs) # type: ignore
 
 
-@router.post("")
+@router.post("", response=ResponseSchema[ColetaOut])
 def create_coleta(request, payload: ColetaIn):
     data_dict = payload.dict()
     responsavel_ids = data_dict.get("responsavel", [])
 
-    # Removendo a lista de responsáveis do dicionário para criar a instância da Coleta
+    # Removendo a lista de responsáveis do dic# type: ignoreionário para criar a instância da Coleta
     del data_dict["responsavel"]
 
-    obj_seq = get_object_or_404(
-        models.SequenciaColetas, id=data_dict.get("sequencia_id"))
+    sequencia = models.SequenciaColetas.objects.filter(pk=data_dict.get("sequencia_id")).first()
 
+    # Verificar se a sequencia com id informado existe no banco de dados
+    if sequencia is None:
+        raise InvalidReferenceException(
+            ref_name='Sequencia',
+            ref_id=payload.sequencia_id, 
+            field='sequencia_id'
+        )
+    
     data_dict["status"] = None
     data_dict["status_message"] = None
 
     # Criando a instância da Coleta sem os responsáveis
-    obj_coleta = models.Coleta.objects.create(**data_dict, sequencia=obj_seq)
+    coleta = models.Coleta.objects.create(**data_dict, sequencia=sequencia)
 
     # Use o método set para adicionar os responsáveis após a criação
     for responsavel_id in responsavel_ids:
         user = User.objects.filter(id=responsavel_id).first()
         if user:
-            obj_coleta.responsavel.add(user)
+            coleta.responsavel.add(user)
 
-    return {"success": True}
+    return response(data=coleta) # type: ignore
 
 
-@router.put("/{id_coleta}")
+@router.put("/{id_coleta}", response=ResponseSchema[ColetaOut])
 def update_coleta(request, id_coleta: int, payload: ColetaIn):
-    obj_coleta = get_object_or_404(models.Coleta, id=id_coleta)
+    coleta = get_object_or_404(models.Coleta, id=id_coleta)
     data_dict = payload.dict()
     responsavel_ids = data_dict.get("responsavel", [])
 
@@ -170,28 +179,28 @@ def update_coleta(request, id_coleta: int, payload: ColetaIn):
 
     # Iterando sobre os campos no payload e atualizar os valores correspondentes na instância
     for attr, value in data_dict.items():
-        setattr(obj_coleta, attr, value)
+        setattr(coleta, attr, value)
 
     # Atualizando os responsáveis
-    obj_coleta.responsavel.clear()
+    coleta.responsavel.clear()
     for responsavel_id in responsavel_ids:
         user = User.objects.filter(id=responsavel_id).first()
         if user:
-            obj_coleta.responsavel.add(user)
+            coleta.responsavel.add(user)
 
-    obj_coleta.save()
+    coleta.save()
 
-    return {"success": True}
+    return response(data=coleta) # type: ignore
 
 
-@router.delete("/{id_coleta}")
+@router.delete("/{id_coleta}", response=ResponseSchema)
 def delete_coleta(request, id_coleta: int):
     obj_coleta = get_object_or_404(models.Coleta, id=id_coleta)
     obj_coleta.delete()
-    return {"success": True}
+    return response(data={'id': id_coleta}, errors=[])
 
 
 @router.get("/{id_coleta}/responsaveis", response=List[UsuarioOut])
 def get_responsaveis_coleta(request, id_coleta: int):
     coleta = get_object_or_404(models.Coleta, id=id_coleta)
-    return coleta.responsavel
+    return response(data=coleta.responsavel) # type: ignore

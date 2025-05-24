@@ -18,7 +18,8 @@ class ColetaIn(Schema):
     cor: float
     data: datetime
     responsavel: List[int]
-    ordem: str
+    ordem: int
+    publico: Optional[bool] = None
 
 
 class ColetaOut(Schema):
@@ -31,10 +32,11 @@ class ColetaOut(Schema):
     cor: float
     data: datetime
     responsaveis_id: List[int]
-    ordem: str
+    ordem: int
     sequencia_id: int
     ponto: PontoColetaOut
     status: Optional[bool] = None
+    publico: Optional[bool] = None
     # status_messages: Optional[List[str]] = None
 
     @staticmethod
@@ -47,82 +49,86 @@ class ColetaOut(Schema):
 
 
 class FilterColeta(FilterSchema):
-    responsavel__username__contains: str = Field(
+    responsavel: Optional[str] = Field( 
         default=None,
-        q=["responsavel__username__contains"]
-    )
+        q=[
+            'responsavel__username__icontains',
+            'responsavel__first_name__icontains',
+            'responsavel__last_name__icontains'
+        ]
+    ) # type: ignore
     
-    data__gte: date = Field(
+    data__gte: Optional[date] = Field(
         default=None,
         alias="data_minima"
     )
     
-    data__lte: date = Field(
+    data__lte: Optional[date] = Field(
         default=None,
         alias="data_maxima"
     )
     
-    sequencia_id: int = Field(
+    sequencia__id: Optional[int] = Field(
         default=None,
-        alias="sequencia__id"
+        alias="sequencia_id"
     )
     
-    temperatura__gte: float = Field(
+    temperatura__gte: Optional[float] = Field(
         default=None,
         alias="temperatura_minima"
     )
     
-    temperatura__lte: float = Field(
+    temperatura__lte: Optional[float] = Field(
         default=None,
         alias="temperatura_maxima"
     )
     
-    cloro_residual_livre__gte: float = Field(
+    cloro_residual_livre__gte: Optional[float] = Field(
         default=None,
         alias="cloro_residual_livre_minimo"
     )
     
-    cloro_residual_livre__lte: float = Field(
+    cloro_residual_livre__lte: Optional[float] = Field(
         default=None,
         alias="cloro_residual_livre_maximo"
     )
     
-    turbidez__gte: float = Field(
+    turbidez__gte: Optional[float] = Field(
         default=None,
         alias="turbidez_minima"
     )
     
-    turbidez__lte: float = Field(
+    turbidez__lte: Optional[float] = Field(
         default=None,
         alias="turbidez_maxima"
     )
     
-    coliformes_totais: bool = Field(
+    coliformes_totais: Optional[bool] = Field(
         default=None,
         alias="coliformes_totais"
     )
     
-    escherichia: bool = Field(
+    escherichia: Optional[bool] = Field(
         default=None,
         alias="escherichia"
     )
     
-    cor__gte: float = Field(
+    cor__gte: Optional[float] = Field(
         default=None,
         alias="cor_minima"
     )
     
-    cor__lte: float = Field(
+    cor__lte: Optional[float] = Field(
         default=None,
         alias="cor_maxima"
     )
     
-    ordem: str = Field(
+    ordem: Optional[str] = Field(
         default=None,
         alias="ordem"
     )
 
-    ponto__edificacao__codigo__exact: str = Field(
+    ponto__edificacao__codigo__exact: Optional[str] = Field(
         default=None,
         alias="codigo_edificacao"
     )

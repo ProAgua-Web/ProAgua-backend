@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
-import csv
-from io import StringIO
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .parametros_referencia import ParametrosReferencia
 
@@ -60,26 +58,25 @@ class Coleta(models.Model):
         verbose_name="responsaveis",
         blank=True,
     )
-    ordem = models.CharField(
-        max_length=8,
-        choices=(
-            ("C", "Coleta"),
-            ("R", "Recoleta")
-        ),
-        default=("C", "Coleta"),
+    ordem = models.SmallIntegerField(
+        default=0,
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(2),
+        ]
     )
     status = models.BooleanField(
         verbose_name="status",
         default=None,
         null=True,
     )
-
     status_message = models.CharField(
         verbose_name="status message",
         max_length=200,
         default=None,
         null=True
     )
+    publico = models.BooleanField(default=False, null=True)
 
     def analise(self):
         status_temperatura = self.analise_temperatura()

@@ -11,7 +11,7 @@ from ...models import SequenciaColetas
 
 class SequenciaColetasIn(Schema):
     amostragem: int
-    ponto: int
+    ponto_id: int
 
 
 class SequenciaColetasOut(Schema):
@@ -35,29 +35,32 @@ class SequenciaColetasOut(Schema):
 
 
 class FilterSequenciaColetas(FilterSchema):
-    q: str = Field(
+    q: Optional[str] = Field( 
         default=None,
-        q=["ponto__localizacao__contains", "ponto__edificacao__nome__contains",
-            "ponto__edificacao__codigo__contains"],
+        q=[
+            "ponto__localizacao__contains",
+            "ponto__edificacao__nome__contains",
+            "ponto__edificacao__codigo__contains"
+        ],
         description="Campo de pesquisa por localização ou nome de edificação"
-    )
+    ) # type: ignore
 
-    amostragem: int = Field(
+    amostragem: Optional[int] = Field(
         default=None,
         alias="amostragem"
     )
 
-    ponto__id: int = Field(
+    ponto__id: Optional[int] = Field(
         default=None,
         alias="ponto_id"
     )
 
-    ponto__edificacao__campus: str = Field(
+    ponto__edificacao__campus: Optional[str] = Field(
         default=None,
         alias="campus"
     )
 
-    status: bool = Field(
+    status: Optional[bool] = Field(
         default=None,
         alias="status"
     )

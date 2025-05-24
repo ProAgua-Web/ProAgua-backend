@@ -5,30 +5,31 @@ Material de referência:
 """
 
 from ninja import Router
+from django.shortcuts import get_object_or_404
 
-from .. import models
-
-from .schemas.parametros_referencia import ParametrosReferenciaIn, ParametrosReferenciaOut
+from .... import models
+from ...utils import save_file, response
+from ...schemas import ResponseSchema
+from ...schemas.parametros_referencia import ParametrosReferenciaIn, ParametrosReferenciaOut
 
 router = Router(tags=["ParametrosReferencia"])
 
-@router.get("", response=ParametrosReferenciaOut)
+@router.get("", response=ResponseSchema[ParametrosReferenciaOut])
 def get_parametros_referencia(request):
-    qs = models.ParametrosReferencia.objects.all()
-    if qs.exists():
-        return qs.last()
-    return {"success": False}
+    parametros = get_object_or_404(models.ParametrosReferencia, id=1)
+    return response(data=parametros)
 
 
-@router.post("", response=ParametrosReferenciaOut)
+@router.post("", response=ResponseSchema[ParametrosReferenciaOut|dict])
 def create_parametros_referencia(request, payload: ParametrosReferenciaIn):
     qs = models.ParametrosReferencia.objects.all()
     if not qs.exists():
         obj_parametros_referencia = models.ParametrosReferencia.objects.create(**payload.dict())
-        return obj_parametros_referencia
-    return {"success": False}
+        return response(data=obj_parametros_referencia)
+    return response(data={'success': False})
 
-@router.put("", response=ParametrosReferenciaOut)
+
+@router.put("", response=ResponseSchema[ParametrosReferenciaOut])
 def update_parametros_referencia(request, payload: ParametrosReferenciaIn):
     obj_parametros_referencia = models.ParametrosReferencia.objects.last()
     data_dict = payload.dict()
@@ -43,12 +44,12 @@ def update_parametros_referencia(request, payload: ParametrosReferenciaIn):
         coleta.analise()
         coleta.save()
 
-    return obj_parametros_referencia
+    return response(data=obj_parametros_referencia)
 
-@router.delete("")
+@router.delete("", response=ResponseSchema)
 def delete_parametros_referencia(request):
     qs = models.ParametrosReferencia.objects.all()
     if qs.exists():
         qs.delete()
-        return {"success": True}
-    return {"success": False}
+        return response(data={"success": True})
+    return response(data={"success": False})

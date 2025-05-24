@@ -3,28 +3,30 @@ from ninja import ModelSchema
 
 
 class UsuarioIn(ModelSchema):
-    class Config:
+    class Config: # type: ignore
         model = User
         model_fields = [
             "username",
             "first_name",
             "last_name",
             "password",
-            "email"
+            "email",
+            "is_superuser"
         ]
 
 class UsuarioUpdate(ModelSchema):
-    class Config:
+    class Config: # type: ignore
         model = User
         model_fields = [
             "username",
             "first_name",
             "last_name",
-            "email"
+            "email",
+            "is_superuser"
         ]
 
 
 class UsuarioOut(ModelSchema):
-    class Config:
+    class Config: # type: ignore
         model = User
         model_exclude = ["password", "user_permissions", "last_login"]

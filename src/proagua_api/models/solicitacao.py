@@ -15,6 +15,7 @@ class TipoSolicitacao(Enum):
     LIMPEZA_RESERVATORIO = "Limpeza de reservatório"
     INSTALACAO_PONTO = "Instalação de ponto de coleta"
     CONSERTO_RESERVATORIO = "Conserto de reservatório"
+    OUTRO = "Outro"
 
 
 class Solicitacao(models.Model):
@@ -58,5 +59,3 @@ class Solicitacao(models.Model):
     )
 
     imagens = models.ManyToManyField(to=Image)
-
-

@@ -4,26 +4,30 @@ import uuid
 from django.shortcuts import get_object_or_404
 from ninja import Router, Query, UploadedFile, File, Form
 from ninja.errors import HttpError
-from ninja.pagination import paginate
 
-from .schemas.edficacao import *
-from .schemas.ponto_coleta import (PontoColetaIn, PontoColetaOut)
-from .. import models
-from .utils import save_file
+from ...schemas import ResponseSchema, PaginatedResponseSchema
+from ...schemas.edficacao import *
+from ...schemas.ponto_coleta import PontoColetaOut
+from ...utils import save_file, response
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from .... import models
 
 router = Router(tags=["Edificacoes"])
 
-@router.get("", response=List[EdificacaoOut])
-@paginate
-def list_edificacoes(request, filters: FilterEdificacao = Query(...)):
+@router.get("", response=PaginatedResponseSchema[EdificacaoOut])
+@paginate(CustomPaginator)
+def list_edificacoes(request, filters: Query[FilterEdificacao]):
+    """Endpoint público para listar todas as edificações"""
     qs = models.Edificacao.objects.all()
-    return filters.filter(qs)
+    qs = filters.filter(qs)
+    return qs
 
 
-@router.get("/{cod_edificacao}", response=EdificacaoOut)
+@router.get("/{cod_edificacao}", response=ResponseSchema[EdificacaoOut])
 def get_edificacao(request, cod_edificacao: str):
     qs = get_object_or_404(models.Edificacao, codigo=cod_edificacao)
-    return qs
+    return response(data=qs)
 
 
 @router.post("/{cod_edificacao}/imagem")
@@ -53,25 +57,25 @@ def delete_image(request, cod_edificacao: str, id_imagem: uuid.UUID):
     return {"success": True}
 
 
-@router.post("", response=EdificacaoOut)
+@router.post("", response=ResponseSchema[EdificacaoOut])
 def create_edificacao(request, payload: EdificacaoIn):
     data = payload.dict()
     edificacao = models.Edificacao.objects.create(**data)
     edificacao.save()
     
-    return edificacao
+    return response(data=edificacao)
 
 
-@router.put("/{cod_edificacao}")
+@router.put("/{cod_edificacao}", response=ResponseSchema[EdificacaoOut])
 def update_edificacoes(request, cod_edificacao: str, payload: EdificacaoIn):
     edificacao = get_object_or_404(models.Edificacao, codigo=cod_edificacao)
     for attr, value in payload.dict().items():
         setattr(edificacao, attr, value)
     edificacao.save()
-    return {"success": True}
+    return response(data=edificacao)
 
 
-@router.delete("/{cod_edificacao}")
+@router.delete("/{cod_edificacao}", response=ResponseSchema)
 def delete_edificacao(request, cod_edificacao: str):
     edificacao = get_object_or_404(models.Edificacao, codigo=cod_edificacao)
 
@@ -79,10 +83,15 @@ def delete_edificacao(request, cod_edificacao: str):
         raise HttpError(409, "Conflict: Related objects exist")
 
     edificacao.delete()
-    return {"success": True}
+    return response(data={"id": cod_edificacao})
 
 
-@router.get("/{cod_edificacao}/pontos")
+@router.get("/{cod_edificacao}/pontos", response=PaginatedResponseSchema[PontoColetaOut])
 def list_pontos(request, cod_edificacao: str):
     qs = models.PontoColeta.objects.filter(edificacao__codigo=cod_edificacao).values()
-    return {"items": list(qs)}
+    return response(
+        data={
+            "items": qs,
+            "count": qs.count()
+        }
+    )

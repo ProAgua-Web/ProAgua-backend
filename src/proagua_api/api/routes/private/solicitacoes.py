@@ -1,23 +1,29 @@
-from typing import List, Dict
 import uuid
-from datetime import datetime
-import os
 
 from django.shortcuts import get_object_or_404
 from django.http import FileResponse
 from ninja import Router, Query, UploadedFile, File, Form
-from ninja.pagination import paginate
+from ninja.errors import HttpError
 
-from .schemas.solicitacao import (
-    SolicitacaoIn, SolicitacaoOut, FilterSolicitacao, SolicitacaoUpdate)
-from .schemas.ponto_coleta import PontoColetaIn, PontoColetaOut
-from .. import models
-from .utils import save_file
+from ...pagination.pagination import paginate
+from ...pagination.custom_paginator import CustomPaginator
+from ...utils import save_file
+from ...utils import response
+from .... import models
+
+from ...schemas.solicitacao import (
+    SolicitacaoIn,
+    SolicitacaoOut,
+    FilterSolicitacao,
+    SolicitacaoUpdate
+)
+from ...schemas import (
+    ResponseSchema,
+    PaginatedResponseSchema,
+)
 
 from docx import Document
-from docx.shared import Pt, Inches
-from docx.oxml.ns import qn, nsdecls
-from docx.oxml import OxmlElement, parse_xml
+from docx.shared import Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.table import WD_ALIGN_VERTICAL
 from io import BytesIO
@@ -25,26 +31,25 @@ from io import BytesIO
 router = Router(tags=["Solicitacoes"])
 
 
-@router.get("", response=List[SolicitacaoOut])
-@paginate
-def list_solicitacoes(request, filters: FilterSolicitacao = Query(...)):
+@router.get("", response=PaginatedResponseSchema[SolicitacaoOut])
+@paginate(CustomPaginator)
+def list_solicitacoes(request, filters: Query[FilterSolicitacao]):
     qs = models.Solicitacao.objects.all()
     return filters.filter(qs)
 
 
-@router.get("/{id}", response=SolicitacaoOut)
+@router.get("/{id}", response=ResponseSchema[SolicitacaoOut])
 def get_solicitacao(request, id: int):
     qs = get_object_or_404(models.Solicitacao, id=id)
-    print(qs)
-    return qs
+    return response(data=qs)
 
 
 @router.post("/{id}/imagem")
-def upload_image(request, id: int, description: str = Form(...), file: UploadedFile = File(...)):
+def upload_image(request, id: int, description: Form[str], file: File[UploadedFile]):
     solicitacao = get_object_or_404(models.Solicitacao, id=id)
 
     img_path = save_file(f'media/images/solicitacoes/solicitacao_{solicitacao.id}_{uuid.uuid4()}.png', file)
-    image = models.Image.objects.create(file=img_path, description=description)
+    image = models.Image.objects.create(src=img_path, description=description)
     image.save()
 
     solicitacao.imagens.add(image)
@@ -53,16 +58,40 @@ def upload_image(request, id: int, description: str = Form(...), file: UploadedF
     return {"success": True}
 
 
-@router.post("", response=SolicitacaoOut)
+@router.delete("/{id_solicitacao}/imagem/{id_imagem}")
+def delete_image(request, id_solicitacao: str, id_imagem: uuid.UUID):
+    solicitacao = get_object_or_404(models.Solicitacao, pk=id_solicitacao)
+    image: models.Image | None = solicitacao.imagens.filter(id=id_imagem).first()
+
+    if image is None:
+        return HttpError(404, "Not found")
+    
+    image.src.delete()
+    image.delete()
+
+    return {"success": True}
+
+
+@router.post("", response=ResponseSchema[SolicitacaoOut])
 def create_solicitacao(request, payload: SolicitacaoIn):
     data = payload.dict()
     ponto = get_object_or_404(models.PontoColeta, id=data.pop("ponto_id"))
+    
     data["ponto"] = ponto
+    data.pop('imagens')
+    
     solicitacao = models.Solicitacao.objects.create(**data)
-    solicitacao.save()
-    return solicitacao
 
-@router.put("/{id}", response=SolicitacaoOut)
+    for img in payload.imagens:
+        img_obj = get_object_or_404(models.Image, id=img.id)
+        solicitacao.imagens.add(img_obj)
+    
+    solicitacao.save()
+    
+    return response(data=solicitacao)
+
+
+@router.put("/{id}", response=ResponseSchema[SolicitacaoOut])
 def update_solicitacao(request, id: int, payload: SolicitacaoUpdate):
     data = payload.dict()
 
@@ -73,14 +102,16 @@ def update_solicitacao(request, id: int, payload: SolicitacaoUpdate):
     for attr, value in data.items():
         setattr(solicitacao, attr, value)
     solicitacao.save()
-    return solicitacao
+    
+    return response(data=solicitacao)
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response=ResponseSchema)
 def delete_solicitacao(request, id: int):
     solicitacao = get_object_or_404(models.Solicitacao, id=id)
     solicitacao.delete()
-    return {"success": True}
+    return response(data={'id': id})
+
 
 @router.get("/{id}/document")
 def generate_doc(request, id: int):
@@ -201,4 +232,5 @@ def generate_doc(request, id: int):
     doc_io = BytesIO()
     doc.save(doc_io)
     doc_io.seek(0)
+    
     return FileResponse(doc_io, as_attachment=True, filename="solicitacao.docx")
