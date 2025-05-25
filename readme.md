@@ -62,7 +62,7 @@ python3 src/manage.py rebuild
 Antes de qualquer coisa, configure as variáveis de ambiente a partir do seguinte modelo:
 ```sh
 DB_NAME = '<nome-do-db>'
-DB_HOST = 'database' # Não alterar
+DB_HOST = 'proagua-database' # Não alterar
 DB_PORT = '5432'     # Porta padrão do postgresql
 DB_USER = '<user-name>'
 DB_PASSWORD = '<user-password>'
