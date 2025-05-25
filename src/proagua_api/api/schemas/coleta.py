@@ -137,3 +137,5 @@ class FilterColeta(FilterSchema):
         default=None,
         alias="ponto_id"
     )
+
+    status: Optional[bool] = None
