@@ -139,3 +139,4 @@ class FilterColeta(FilterSchema):
     )
 
     status: Optional[bool] = None
+    publico: Optional[bool] = None
