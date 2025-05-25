@@ -21,7 +21,7 @@ class EdificacaoOut(Schema):
 
 
 class FilterEdificacao(FilterSchema):
-    q: Optional[str] = Field(None, q=['nome__contains', 'codigo__contains']) # type: ignore
+    q: Optional[str] = Field(None, q=['nome__icontains', 'codigo__icontains']) # type: ignore
     cronograma__gte: Optional[int] = None
     cronograma__lte: Optional[int] = None
     campus: Optional[str] = None
