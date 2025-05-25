@@ -1,5 +1,6 @@
 from ninja import Router
 from django.shortcuts import get_object_or_404
+from django.http import Http404
 from ninja import Query
 
 from ...schemas import ResponseSchema, PaginatedResponseSchema
@@ -38,5 +39,9 @@ def get_ponto(request, id_ponto: int):
 @router.get("/{id_ponto}/coleta", response=ResponseSchema[ColetaOut])
 def get_coleta(request, id_ponto: int):
     """Endpoins público que retorna a última coleta pública realizada no ponto"""
-    coleta = get_object_or_404(models.Coleta, ponto_id=id_ponto, publico=True)
+    coleta = models.Coleta.objects.filter(ponto_id=id_ponto, publico=True).last()
+
+    if coleta is None:
+        raise Http404("Nenhuma coleta encontrada.")
+    
     return response(data=coleta) # type: ignore
