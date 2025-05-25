@@ -49,6 +49,11 @@ class FilterPontos(FilterSchema):
         alias="tipo",
         q=["tipo__in"],
     ) # type: ignore
+    codigo_edificacao: Optional[str] = Field(
+        default=None,
+        q=['edificacao__codigo'],
+        description="Busca pontos por código de edificação"
+    ) # type: ignore
     # status: Optional[bool] = Field(default=None)
 
 
