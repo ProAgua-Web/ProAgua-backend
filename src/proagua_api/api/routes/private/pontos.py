@@ -4,10 +4,8 @@ Material de referência:
     https://django-ninja.rest-framework.com/guides/response/?h=resolvers#resolvers
 """
 
-from typing import List
 import uuid
 
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import Router, Query, UploadedFile, File, Form
 from ninja.errors import HttpError
@@ -43,13 +41,6 @@ def get_ponto(request, id_ponto: int):
     return response(data=qs)
 
 
-@router.get("/{id_ponto}/coleta", response=ResponseSchema[ColetaOut])
-def get_coleta(request, id_ponto: int):
-    """Endpoins público que retorna a última coleta pública realizada no ponto"""
-    coleta = get_object_or_404(models.Coleta, ponto_id=id_ponto, publico=True)
-    return response(data=coleta)  # type: ignore
-
-
 @router.post("/{id_ponto}/imagem", response=ResponseSchema[PontoColetaOut])
 def upload_image(request, id_ponto: str, description: Form[str], file: File[UploadedFile]):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
@@ -68,7 +59,7 @@ def upload_image(request, id_ponto: str, description: Form[str], file: File[Uplo
 @router.delete('/{id_ponto}/imagem/{id_imagem}')
 def delete_image(request, id_ponto: str, id_imagem: uuid.UUID):
     ponto = get_object_or_404(models.PontoColeta, id=id_ponto)
-    image: models.Image = ponto.imagens.filter(id=id_imagem).first()
+    image: models.Image | None = ponto.imagens.filter(id=id_imagem).first()
 
     if image is None:
         return HttpError(404, "Not found")
