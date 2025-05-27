@@ -10,6 +10,7 @@ services:
     depends_on:
       - proagua-database
     volumes:
+      - ./src:/app/src
       - uploads_volume:/app/uploads
 
   proagua-database:
