@@ -149,18 +149,21 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     ".vercel.app",
+    "http://www.proagua.ufersa.dev.br"
 ]
 
 CORS_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     ".vercel.app",
+    "http://www.proagua.ufersa.dev.br"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000', 
     'http://localhost:8000',
     ".vercel.app",
+    "http://www.proagua.ufersa.dev.br",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
