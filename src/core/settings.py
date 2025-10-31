@@ -41,7 +41,7 @@ DEBUG = True
 
 # SECURITY WARNING: Uso somente durante fase de desenvolvimento.
 # informe somente os hosts de sua aplicação.
-ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app"]
+ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app", "52.86.96.45"]
 
 # Application definition
 
@@ -148,22 +148,22 @@ LOGIN_REDIRECT_URL = '/sequencias_coletas/'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
-    ".vercel.app",
-    "http://www.proagua.ufersa.dev.br"
+    "http://www.proagua.ufersa.dev.br",
+    "http://52.86.96.45:8000" # temp
 ]
 
 CORS_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
-    ".vercel.app",
-    "http://www.proagua.ufersa.dev.br"
+    "http://www.proagua.ufersa.dev.br",
+    "http://52.86.96.45:8000" # temp
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000', 
     'http://localhost:8000',
-    ".vercel.app",
     "http://www.proagua.ufersa.dev.br",
+    "http://52.86.96.45:8000" # temp
 ]
 
 CORS_ALLOW_CREDENTIALS = True
