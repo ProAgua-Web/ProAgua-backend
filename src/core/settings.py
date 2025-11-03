@@ -41,7 +41,7 @@ DEBUG = True
 
 # SECURITY WARNING: Uso somente durante fase de desenvolvimento.
 # informe somente os hosts de sua aplicação.
-ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app", "52.86.96.45"]
+ALLOWED_HOSTS = ["127.0.0.1", ".vercel.app", "52.86.96.45", "localhost"]
 
 # Application definition
 
