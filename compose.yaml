@@ -1,0 +1,33 @@
+services:
+  proagua-backend:
+    container_name: "proagua-backend"
+    build: .
+    image: proagua-backend:latest
+    ports:
+      - 8000:8000
+    networks:
+      - mynet
+    depends_on:
+      - proagua-database
+    volumes:
+      - ./src:/app/src
+      - uploads_volume:/app/uploads
+
+  proagua-database:
+    container_name: "proagua-database"
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - ${DB_PORT}:5432
+    networks:
+      - mynet
+
+networks:
+  mynet:
+    driver: bridge
+
+volumes:
+  uploads_volume:
