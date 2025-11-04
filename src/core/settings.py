@@ -11,12 +11,17 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-MEDIA_ROOT = BASE_DIR / 'files'
+MEDIA_ROOT = '/app/uploads'
 MEDIA_URL = 'files/'
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -49,11 +54,11 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    # 'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'apps.proagua_api',
+    'proagua_api',
 ]
 
 MIDDLEWARE = [
@@ -61,10 +66,11 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'proagua_api.middleware.DisableCSRFMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -93,8 +99,12 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -143,13 +153,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = '/sequencias_coletas/'
 
 # SECURITY WARNING: Não deve ser usado em produção.
-# CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     "http://www.proagua.ufersa.dev.br",
     "http://52.86.96.45:8000" # temp
+    'https://proagua-ufersa.up.railway.app',
+    'https://pro-agua-frontend.vercel.app',
+    'https://127.0.0.1:3000',
+    'http://127.0.0.1:3000',
 ]
 
 CORS_TRUSTED_ORIGINS = [
@@ -157,6 +171,10 @@ CORS_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     "http://www.proagua.ufersa.dev.br",
     "http://52.86.96.45:8000" # temp
+    'https://proagua-ufersa.up.railway.app',
+    'https://pro-agua-frontend.vercel.app',
+    'https://127.0.0.1:3000',
+    'http://127.0.0.1:3000',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -167,3 +185,13 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# SESSION_COOKIE_SAMESITE = 'None'
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SAMESITE = 'None'
+# CSRF_COOKIE_SECURE = True
+
+# SESSION_COOKIE_DOMAIN = 'pro-agua-frontend.vercel.app'
+# CSRF_COOKIE_DOMAIN = 'pro-agua-frontend.vercel.app'
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 10000
