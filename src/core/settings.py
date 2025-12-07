@@ -159,7 +159,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     "http://www.proagua.ufersa.dev.br",
-    "http://52.86.96.45:8000" # temp
+    "http://52.86.96.45:8000", # temp
     'https://proagua-ufersa.up.railway.app',
     'https://pro-agua-frontend.vercel.app',
     'https://127.0.0.1:3000',
@@ -170,7 +170,7 @@ CORS_TRUSTED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:8000',
     "http://www.proagua.ufersa.dev.br",
-    "http://52.86.96.45:8000" # temp
+    "http://52.86.96.45:8000", # temp
     'https://proagua-ufersa.up.railway.app',
     'https://pro-agua-frontend.vercel.app',
     'https://127.0.0.1:3000',
@@ -181,7 +181,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000', 
     'http://localhost:8000',
     "http://www.proagua.ufersa.dev.br",
-    "http://52.86.96.45:8000" # temp
+    "http://52.86.96.45:8000", # temp
 ]
 
 CORS_ALLOW_CREDENTIALS = True
